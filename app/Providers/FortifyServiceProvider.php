@@ -11,6 +11,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
+use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
@@ -32,6 +33,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureLoginRedirect();
     }
 
     /**
@@ -95,6 +97,32 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by(
                 ($request->input('credential.id') ?: $request->session()->getId()).'|'.$request->ip(),
             );
+        });
+    }
+
+    /**
+     * Redirect post-login per ruolo: un cliente esterno non entra mai nell'area interna.
+     */
+    private function configureLoginRedirect(): void
+    {
+        $this->app->instance(LoginResponse::class, new class implements LoginResponse
+        {
+            public function toResponse($request)
+            {
+                $user = $request->user();
+
+                if ($user->isClient()) {
+                    auth()->logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return redirect()->route('login')->withErrors([
+                        'email' => "Quest'area è riservata al team. Accedi dal link del tuo PED.",
+                    ]);
+                }
+
+                return redirect()->intended(route('dashboard'));
+            }
         });
     }
 }

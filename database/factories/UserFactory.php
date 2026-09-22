@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -33,6 +34,8 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'role' => UserRole::AccountManager->value,
+            'is_active' => true,
         ];
     }
 
@@ -56,5 +59,30 @@ class UserFactory extends Factory
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
         ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn () => ['role' => UserRole::Admin->value]);
+    }
+
+    public function accountManager(): static
+    {
+        return $this->state(fn () => ['role' => UserRole::AccountManager->value]);
+    }
+
+    public function copywriter(): static
+    {
+        return $this->state(fn () => ['role' => UserRole::Copywriter->value]);
+    }
+
+    public function client(): static
+    {
+        return $this->state(fn () => ['role' => UserRole::Client->value]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn () => ['is_active' => false]);
     }
 }

@@ -24,7 +24,7 @@ class RegistrationTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_new_users_can_register()
+    public function test_registration_without_a_valid_ped_link_is_forbidden()
     {
         $response = $this->post(route('register.store'), [
             'name' => 'Test User',
@@ -33,7 +33,7 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertForbidden();
+        $this->assertGuest();
     }
 }

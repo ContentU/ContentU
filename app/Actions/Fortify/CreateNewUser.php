@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -24,10 +25,22 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        // Il cliente viene messo in sessione dal middleware del link pubblico (Fase 07).
+        // Senza di esso non si può registrare nessuno: nessun utente interno nasce da /register.
+        $clientId = session('ped.public_link.client_id');
+
+        abort_if($clientId === null, 403, 'La registrazione è possibile solo da un link PED valido.');
+
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'role' => UserRole::Client->value,
+            'is_active' => true,
         ]);
+
+        $user->clients()->attach($clientId);
+
+        return $user;
     }
 }
