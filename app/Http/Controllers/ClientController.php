@@ -1,0 +1,163 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enums\ClientStatus;
+use App\Models\Client;
+use App\Models\User;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
+
+class ClientController extends Controller
+{
+    use AuthorizesRequests;
+
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', Client::class);
+
+        $user = $request->user();
+
+        // Un account manager o copywriter vede solo i propri clienti.
+        // Filtro lato QUERY, non lato front-end: i dati non devono nemmeno partire.
+        $query = $user->isAdmin() ? Client::query() : $user->clients();
+
+        if ($status = $request->string('status')->toString()) {
+            $query->where('status', $status);
+        }
+
+        return Inertia::render('clients/index', [
+            'clients' => $query->with('teamMembers:id,name')
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Client $c) => [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'initials' => $c->initials(),
+                    'status' => $c->status->value,
+                    'pausedAt' => $c->paused_at?->format('j M'),
+                    'team' => $c->teamMembers->map(fn ($u) => [
+                        'id' => $u->id, 'name' => $u->name,
+                    ]),
+                ]),
+            'filters' => ['status' => $request->string('status')->toString()],
+            'statuses' => collect(ClientStatus::cases())
+                ->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()]),
+        ]);
+    }
+
+    public function create()
+    {
+        $this->authorize('create', Client::class);
+
+        return Inertia::render('clients/create', [
+            'assignableUsers' => $this->assignableUsers(),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $this->authorize('create', Client::class);
+
+        $data = $this->validated($request);
+        $userIds = $request->input('user_ids', []);
+
+        $client = Client::create($data);
+        $client->users()->sync($userIds);
+
+        Inertia::flash('message', 'Cliente creato.');
+
+        return to_route('clients.index');
+    }
+
+    public function edit(Client $client)
+    {
+        $this->authorize('update', $client);
+
+        return Inertia::render('clients/edit', [
+            'client' => [
+                'id' => $client->id,
+                'name' => $client->name,
+                'brandName' => $client->brand_name,
+                'status' => $client->status->value,
+                'contacts' => $client->contacts ?? [],
+                'logoUrl' => $client->logo_path ? Storage::url($client->logo_path) : null,
+                'toneOfVoice' => $client->tone_of_voice,
+                'internalNotes' => $client->internal_notes,
+                'shootingNotes' => $client->shooting_notes,
+                'userIds' => $client->users()->pluck('users.id'),
+            ],
+            'assignableUsers' => $this->assignableUsers(),
+        ]);
+    }
+
+    public function update(Request $request, Client $client)
+    {
+        $this->authorize('update', $client);
+
+        $data = $this->validated($request);
+
+        // paused_at si valorizza solo alla transizione verso "in pausa".
+        if ($data['status'] === 'paused' && $client->status->value !== 'paused') {
+            $data['paused_at'] = now();
+        } elseif ($data['status'] !== 'paused') {
+            $data['paused_at'] = null;
+        }
+
+        $client->update($data);
+        $client->users()->sync($request->input('user_ids', []));
+
+        Inertia::flash('message', 'Cliente aggiornato.');
+
+        return to_route('clients.index');
+    }
+
+    public function destroy(Client $client)
+    {
+        $this->authorize('delete', $client);
+
+        $client->delete();   // soft delete
+
+        Inertia::flash('message', 'Cliente archiviato.');
+
+        return to_route('clients.index');
+    }
+
+    private function validated(Request $request): array
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'brand_name' => ['nullable', 'string', 'max:255'],
+            'status' => ['required', 'in:active,paused,archived'],
+            'contacts' => ['nullable', 'array'],
+            'contacts.*.name' => ['required', 'string', 'max:255'],
+            'contacts.*.email' => ['nullable', 'email', 'max:255'],
+            'contacts.*.phone' => ['nullable', 'string', 'max:50'],
+            'contacts.*.role' => ['nullable', 'string', 'max:255'],
+            'tone_of_voice' => ['nullable', 'string'],
+            'internal_notes' => ['nullable', 'string'],
+            'shooting_notes' => ['nullable', 'string'],
+            'logo' => ['nullable', 'image', 'max:'.config('ped.logo_max_kb')],
+            'user_ids' => ['nullable', 'array'],
+            'user_ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $validated['logo_path'] = $request->file('logo')->store('client-logos', 'public');
+        }
+
+        unset($validated['logo'], $validated['user_ids']);
+
+        return $validated;
+    }
+
+    private function assignableUsers()
+    {
+        return User::whereIn('role', ['admin', 'account_manager', 'copywriter'])
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'role']);
+    }
+}
