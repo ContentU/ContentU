@@ -5,8 +5,14 @@ import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { resolve } from 'path';
 
 export default defineConfig({
+    resolve: {
+        alias: {
+            '@': resolve(__dirname, './resources/js'),
+        },
+    },
     plugins: lazyPlugins(() => {
         const plugins = [
             laravel({
