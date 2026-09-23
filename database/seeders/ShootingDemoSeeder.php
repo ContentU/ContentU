@@ -82,7 +82,7 @@ class ShootingDemoSeeder extends Seeder
             $roles[] = fake()->randomElement(['photo', 'video']);
         }
 
-        $assignees->each(function (User $user, int $i) {
+        $assignees->each(function (User $user, int $i) use ($session, $roles) {
             $session->assignments()->create([
                 'user_id' => $user->id,
                 'role' => $roles[$i],
