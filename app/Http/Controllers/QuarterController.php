@@ -119,7 +119,7 @@ class QuarterController extends Controller
             : array_map(fn ($s) => $s->value, ContentStatus::cases());
 
         $contents = $quarter->contents()
-            ->with(['contentType:id,key,label', 'tags:id,label'])
+            ->with(['contentType:id,key,label', 'tags:id,label', 'comments.author:id,name'])
             ->whereIn('status', $statuses)
             ->orderBy('publish_at')
             ->get();

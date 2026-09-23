@@ -145,6 +145,13 @@ export default function QuarterFeed({
                     actions={actions}
                     onApprove={() => updateStatus('approved')}
                     onReject={() => updateStatus('needs_changes')}
+                    onResumeToDraft={() => updateStatus('draft')}
+                    onSubmitComment={(body) => {
+                        if (!selected) return;
+                        router.post(`/contents/${selected.id}/comments`, {
+                            body,
+                        });
+                    }}
                 />
             </div>
         </AppLayout>

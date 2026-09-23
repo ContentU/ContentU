@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+// TODO v1.1: log attività (chi ha creato/modificato/approvato cosa) — S rimandata, vedi PIANO_SVILUPPO_PED.md §3.6
+// TODO v2:   assegnazione contenuti a un membro specifico — C fuori v1, vedi §3.6
 class Content extends Model
 {
     /** @use HasFactory<ContentFactory> */
@@ -122,7 +124,7 @@ class Content extends Model
      */
     public function toFeedArray(): array
     {
-        $this->loadMissing('contentType', 'tags');
+        $this->loadMissing('contentType', 'tags', 'comments.author');
 
         return [
             'id' => $this->id,
@@ -142,6 +144,16 @@ class Content extends Model
                 'label' => $tag->label,
             ])->all(),
             'isToday' => $this->publish_at->isToday(),
+            'comments' => $this->comments
+                ->sortBy('created_at')
+                ->values()
+                ->map(fn (Comment $comment) => [
+                    'id' => $comment->id,
+                    'authorLabel' => $comment->authorLabel(),
+                    'authorName' => $comment->author->name,
+                    'body' => $comment->body,
+                    'createdAtLabel' => $comment->created_at->locale('it')->translatedFormat('j M, H:i'),
+                ])->all(),
         ];
     }
 }

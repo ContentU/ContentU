@@ -36,8 +36,8 @@ export default function PublicPedFeed({
         router.post(`/ped/${token}/contents/${selected.id}/approve`);
     };
 
-    // window.prompt è provvisorio: il pannello commenti vero arriva con
-    // ContentDetailPanel + comment-thread nella Fase 09.5.
+    // Il rifiuto richiede sempre un motivo esplicito (§3.7): un prompt
+    // rapido va bene finché non arriva un layout dedicato dal capo.
     const reject = () => {
         if (!selected) return;
 
@@ -52,13 +52,8 @@ export default function PublicPedFeed({
         });
     };
 
-    const comment = () => {
+    const submitComment = (body: string) => {
         if (!selected) return;
-
-        const body = window.prompt('Scrivi un commento per il team.');
-
-        if (!body) return;
-
         router.post(`/ped/${token}/contents/${selected.id}/comment`, {
             body,
         });
@@ -110,7 +105,7 @@ export default function PublicPedFeed({
                     actions={actions}
                     onApprove={approve}
                     onReject={reject}
-                    onComment={comment}
+                    onSubmitComment={submitComment}
                 />
             </div>
         </div>

@@ -21,6 +21,7 @@ export type FeedContent = {
     channels: string[];
     tags: { id: number; label: string }[];
     isToday: boolean;
+    comments: ContentComment[];
 };
 
 /** Cosa può fare chi sta guardando. Deciso dal server, mai dedotto nel front-end. */
@@ -29,4 +30,12 @@ export type FeedViewerActions = {
     canReject: boolean;
     canComment: boolean;
     canEdit: boolean; // SEMPRE false per il cliente esterno
+};
+
+export type ContentComment = {
+    id: number;
+    authorLabel: 'Cliente' | 'Team';
+    authorName: string;
+    body: string;
+    createdAtLabel: string;
 };

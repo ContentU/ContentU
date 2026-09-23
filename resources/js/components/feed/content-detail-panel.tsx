@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { CommentThread } from '@/components/comments/comment-thread';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import type { FeedContent, FeedViewerActions } from '@/types/content';
@@ -8,7 +9,8 @@ type Props = {
     actions: FeedViewerActions;
     onApprove?: () => void;
     onReject?: () => void;
-    onComment?: () => void;
+    onSubmitComment?: (body: string) => void;
+    onResumeToDraft?: () => void;
 };
 
 export function ContentDetailPanel({
@@ -16,7 +18,8 @@ export function ContentDetailPanel({
     actions,
     onApprove,
     onReject,
-    onComment,
+    onSubmitComment,
+    onResumeToDraft,
 }: Props) {
     if (!content) {
         return (
@@ -25,6 +28,10 @@ export function ContentDetailPanel({
             </div>
         );
     }
+
+    const lastClientComment = [...content.comments]
+        .reverse()
+        .find((c) => c.authorLabel === 'Cliente');
 
     return (
         <div className="space-y-4 rounded-lg border border-border p-4">
@@ -70,6 +77,13 @@ export function ContentDetailPanel({
                 <span>Programmato per {content.publishAtLabel}</span>
             </div>
 
+            {content.status === 'needs_changes' && lastClientComment && (
+                <div className="rounded-md bg-brand-rose-tint p-3 text-sm">
+                    <p className="font-medium">Ultima richiesta del cliente</p>
+                    <p>{lastClientComment.body}</p>
+                </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
                 {actions.canApprove && (
                     <Button onClick={onApprove}>✓ Approva</Button>
@@ -79,9 +93,9 @@ export function ContentDetailPanel({
                         ✕ Rifiuta
                     </Button>
                 )}
-                {actions.canComment && (
-                    <Button variant="ghost" onClick={onComment}>
-                        ✎ Commenta
+                {actions.canEdit && content.status === 'needs_changes' && (
+                    <Button variant="outline" onClick={onResumeToDraft}>
+                        Riprendi in lavorazione
                     </Button>
                 )}
                 {actions.canEdit && (
@@ -92,6 +106,13 @@ export function ContentDetailPanel({
                     </Button>
                 )}
             </div>
+
+            {actions.canComment && (
+                <CommentThread
+                    comments={content.comments}
+                    onSubmit={onSubmitComment}
+                />
+            )}
         </div>
     );
 }

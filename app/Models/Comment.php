@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// TODO v1.1: thread di risposta ai commenti — S rimandata, vedi §3.7
+// TODO v1.1: storico commenti dopo la risoluzione (audit) — S rimandata, vedi §3.7
 class Comment extends Model
 {
     /** @use HasFactory<CommentFactory> */

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ContentTypeController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\PublicLinkController;
 use App\Http\Controllers\PublicPedController;
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'role:admin,account_manager,copywriter'])->group(func
     Route::put('contents/{content}', [ContentController::class, 'update'])->name('contents.update');
     Route::delete('contents/{content}', [ContentController::class, 'destroy'])->name('contents.destroy');
     Route::patch('contents/{content}/status', [ContentController::class, 'updateStatus'])->name('contents.status');
+    Route::post('contents/{content}/comments', [CommentController::class, 'store'])->name('comments.store');
 
     Route::get('quarters/{quarter}/topics', [TopicPreviewController::class, 'index'])->name('topics.index');
     Route::post('quarters/{quarter}/topics', [TopicPreviewController::class, 'store'])->name('topics.store');
