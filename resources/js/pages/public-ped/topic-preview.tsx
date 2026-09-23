@@ -60,7 +60,13 @@ function MonthBadge({ month }: { month: Month }) {
     );
 }
 
-function ApprovalPanel({ month, token }: { month: Month; token: string }) {
+function ApprovalPanel({
+    month,
+    clientSlug,
+}: {
+    month: Month;
+    clientSlug: string;
+}) {
     const [comment, setComment] = useState('');
 
     const respond = (status: 'approved' | 'approved_with_notes' | 'revise') => {
@@ -69,7 +75,7 @@ function ApprovalPanel({ month, token }: { month: Month; token: string }) {
             return;
         }
 
-        router.post(`/ped/${token}/topics/${month.id}/respond`, {
+        router.post(`/ped/${clientSlug}/topics/${month.id}/respond`, {
             status,
             comment: comment.trim() || null,
         });
@@ -116,7 +122,7 @@ export default function PublicPedTopicPreview({
     months,
     synthesis,
 }: Props) {
-    const token = window.location.pathname.split('/')[2];
+    const clientSlug = window.location.pathname.split('/')[2];
 
     return (
         <div className="mx-auto max-w-(--container-reading) px-4 py-8">
@@ -215,7 +221,7 @@ export default function PublicPedTopicPreview({
                             ))}
                         </div>
 
-                        <ApprovalPanel month={month} token={token} />
+                        <ApprovalPanel month={month} clientSlug={clientSlug} />
                     </section>
                 ))}
 
@@ -280,7 +286,7 @@ export default function PublicPedTopicPreview({
                 Una volta approvati i temi, nella sezione Contenuti trovi il
                 piano nel dettaglio.{' '}
                 <Link
-                    href={`/ped/${token}/feed`}
+                    href={`/ped/${clientSlug}/feed`}
                     className="text-primary hover:underline"
                 >
                     Vai ai contenuti

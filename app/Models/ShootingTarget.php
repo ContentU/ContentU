@@ -18,11 +18,13 @@ class ShootingTarget extends Model
         'weight', 'status_note',
     ];
 
+    /** @return BelongsTo<Client, $this> */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
+    /** @return BelongsTo<Quarter, $this> */
     public function quarter(): BelongsTo
     {
         return $this->belongsTo(Quarter::class);

@@ -11,13 +11,15 @@ use App\Models\ShootingTarget;
 use App\Models\User;
 use App\Support\WorkloadCalculator;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ShootingController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $sessions = ShootingSession::with(['client:id,name', 'assignments.user:id,name'])
             ->where('session_date', '>=', today()->subDays(7))
@@ -60,7 +62,7 @@ class ShootingController extends Controller
             'quarters' => Client::query()
                 ->with(['quarters:id,client_id,label'])
                 ->get()
-                ->flatMap(fn (Client $c) => $c->quarters->map(fn ($q) => [
+                ->flatMap(fn (Client $c) => $c->quarters->map(fn (Quarter $q) => [
                     'id' => $q->id, 'clientId' => $c->id, 'label' => $q->label,
                 ]))
                 ->values(),
@@ -72,7 +74,7 @@ class ShootingController extends Controller
         ]);
     }
 
-    public function storeTarget(Request $request)
+    public function storeTarget(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'client_id' => ['required', 'exists:clients,id'],
@@ -84,7 +86,7 @@ class ShootingController extends Controller
             'status_note' => ['nullable', 'string'],
         ]);
 
-        $quarter = Quarter::findOrFail($data['quarter_id']);
+        $quarter = Quarter::findOrFail((int) $data['quarter_id']);
 
         ShootingTarget::updateOrCreate(
             ['client_id' => $data['client_id'], 'quarter_id' => $data['quarter_id']],
@@ -96,7 +98,7 @@ class ShootingController extends Controller
         return back();
     }
 
-    public function storeSession(Request $request)
+    public function storeSession(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'client_id' => ['required', 'exists:clients,id'],
@@ -126,7 +128,7 @@ class ShootingController extends Controller
         return back();
     }
 
-    public function updatePlanningRules(Request $request)
+    public function updatePlanningRules(Request $request): RedirectResponse
     {
         $data = $request->validate(['value' => ['nullable', 'string']]);
 

@@ -79,7 +79,7 @@ Route::middleware(['auth', 'role:admin,account_manager'])->group(function () {
     Route::delete('public-links/{link}', [PublicLinkController::class, 'destroy'])->name('public-link.destroy');
 });
 
-Route::middleware('public-link')->prefix('ped/{token}')->group(function () {
+Route::middleware('public-link')->prefix('ped/{clientSlug}')->group(function () {
     Route::get('/', [PublicPedController::class, 'entry'])->name('ped.entry');
     Route::post('check-email', [PublicPedController::class, 'checkEmail'])->name('ped.check-email');
     Route::get('argomenti', [PublicPedController::class, 'topics'])->name('ped.topics');

@@ -23,6 +23,7 @@ enum ContentStatus: string
         };
     }
 
+    /** @return list<self> */
     public function allowedNext(): array
     {
         return match ($this) {

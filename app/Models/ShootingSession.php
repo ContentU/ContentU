@@ -9,7 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon $session_date
+ * @property ShootingType $type
+ */
 class ShootingSession extends Model
 {
     /** @use HasFactory<ShootingSessionFactory> */
@@ -30,16 +35,19 @@ class ShootingSession extends Model
         ];
     }
 
+    /** @return BelongsTo<Client, $this> */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
+    /** @return HasMany<ShootingSessionAssignment, $this> */
     public function assignments(): HasMany
     {
         return $this->hasMany(ShootingSessionAssignment::class);
     }
 
+    /** @return BelongsToMany<User, $this> */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'shooting_session_assignments')
@@ -49,6 +57,8 @@ class ShootingSession extends Model
     /**
      * Solo i campi che il cliente può vedere (decisione B).
      * Usa SEMPRE questo metodo per le viste pubbliche: non costruire l'array a mano.
+     *
+     * @return array{id: int, date: string, dateLabel: string, type: string, typeLabel: string}
      */
     public function toClientArray(): array
     {

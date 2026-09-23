@@ -20,12 +20,12 @@ class ClientAwareAuthResponse implements LoginResponse, RegisterResponse
         $user = $request->user();
 
         if ($user->isClient()) {
-            $token = $request->session()->get('ped.public_link.token');
+            $clientSlug = $request->session()->get('ped.public_link.client_slug');
             $clientId = $request->session()->get('ped.public_link.client_id');
 
-            if ($token !== null && $clientId !== null
+            if ($clientSlug !== null && $clientId !== null
                 && $user->clients()->whereKey($clientId)->exists()) {
-                return redirect()->route('ped.feed', $token);
+                return redirect()->route('ped.feed', $clientSlug);
             }
 
             auth()->logout();

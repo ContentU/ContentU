@@ -19,7 +19,11 @@ enum QuarterStatus: string
         };
     }
 
-    /** Stati raggiungibili da questo stato. Nessun salto consentito. */
+    /**
+     * Stati raggiungibili da questo stato. Nessun salto consentito.
+     *
+     * @return list<self>
+     */
     public function allowedNext(): array
     {
         return match ($this) {

@@ -20,6 +20,7 @@ class ClientPublicLink extends Model
         return ['revoked_at' => 'datetime'];
     }
 
+    /** @return BelongsTo<Client, $this> */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -39,7 +40,11 @@ class ClientPublicLink extends Model
         ]);
     }
 
-    /** Stati dei contenuti visibili attraverso questo link. Una sola definizione. */
+    /**
+     * Stati dei contenuti visibili attraverso questo link. Una sola definizione.
+     *
+     * @return list<string>
+     */
     public function visibleStatuses(): array
     {
         return $this->visibility === 'full_ped'

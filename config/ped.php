@@ -18,4 +18,10 @@ return [
 
     // Fase 05 — canali disponibili per i contenuti
     'channels' => ['instagram', 'facebook', 'tiktok', 'linkedin'],
+
+    // UserSeeder — utente admin iniziale
+    'seed' => [
+        'admin_email' => env('SEED_ADMIN_EMAIL', 'admin@example.com'),
+        'admin_password' => env('SEED_ADMIN_PASSWORD'),
+    ],
 ];

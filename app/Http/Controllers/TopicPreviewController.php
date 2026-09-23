@@ -4,16 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Quarter;
 use App\Models\TopicPreview;
+use App\Models\TopicPreviewItem;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class TopicPreviewController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index(Quarter $quarter)
+    public function index(Quarter $quarter): Response
     {
         $this->authorize('view', $quarter->client);
 
@@ -34,7 +37,7 @@ class TopicPreviewController extends Controller
         ]);
     }
 
-    public function store(Request $request, Quarter $quarter)
+    public function store(Request $request, Quarter $quarter): RedirectResponse
     {
         $this->authorize('update', $quarter->client);
 
@@ -50,7 +53,7 @@ class TopicPreviewController extends Controller
         return back();
     }
 
-    public function update(Request $request, TopicPreview $topicPreview)
+    public function update(Request $request, TopicPreview $topicPreview): RedirectResponse
     {
         $this->authorize('update', $topicPreview->quarter->client);
 
@@ -67,7 +70,7 @@ class TopicPreviewController extends Controller
         return back();
     }
 
-    public function destroy(TopicPreview $topicPreview)
+    public function destroy(TopicPreview $topicPreview): RedirectResponse
     {
         $this->authorize('update', $topicPreview->quarter->client);
 
@@ -78,6 +81,7 @@ class TopicPreviewController extends Controller
         return back();
     }
 
+    /** @return array<string, mixed> */
     private function monthPayload(TopicPreview $preview): array
     {
         return [
@@ -87,7 +91,7 @@ class TopicPreviewController extends Controller
             'status' => $preview->status,
             'statusLabel' => $preview->statusLabel(),
             'note' => $preview->note,
-            'items' => $preview->items->map(fn ($item) => [
+            'items' => $preview->items->map(fn (TopicPreviewItem $item) => [
                 'id' => $item->id,
                 'contentTypeId' => $item->content_type_id,
                 'formatLabel' => $item->format_label,

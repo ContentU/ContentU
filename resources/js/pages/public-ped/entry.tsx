@@ -14,7 +14,7 @@ type PublicClient = {
 
 type Props = {
     client: PublicClient;
-    token: string;
+    clientSlug: string;
     mode: 'login' | 'register' | null;
     email: string | null;
     passwordRules: string;
@@ -44,14 +44,20 @@ function ClientHeader({ client }: { client: PublicClient }) {
     );
 }
 
-function EmailStep({ client, token }: { client: PublicClient; token: string }) {
+function EmailStep({
+    client,
+    clientSlug,
+}: {
+    client: PublicClient;
+    clientSlug: string;
+}) {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
     });
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(`/ped/${token}/check-email`);
+        post(`/ped/${clientSlug}/check-email`);
     };
 
     return (
@@ -203,7 +209,7 @@ function RegisterStep({
 
 export default function PublicPedEntry({
     client,
-    token,
+    clientSlug,
     mode,
     email,
     passwordRules,
@@ -212,7 +218,9 @@ export default function PublicPedEntry({
         <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
             <Head title={`${client.name} — Accesso PED`} />
 
-            {mode === null && <EmailStep client={client} token={token} />}
+            {mode === null && (
+                <EmailStep client={client} clientSlug={clientSlug} />
+            )}
             {mode === 'login' && email && (
                 <LoginStep client={client} email={email} />
             )}

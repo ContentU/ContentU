@@ -19,11 +19,13 @@ class TopicPreviewApproval extends Model
         return ['responded_at' => 'datetime'];
     }
 
+    /** @return BelongsTo<TopicPreview, $this> */
     public function preview(): BelongsTo
     {
         return $this->belongsTo(TopicPreview::class, 'topic_preview_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function respondedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responded_by');

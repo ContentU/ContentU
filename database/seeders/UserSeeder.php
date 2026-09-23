@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $password = env('SEED_ADMIN_PASSWORD');
+        $password = config('ped.seed.admin_password');
 
         if (blank($password)) {
             if (! app()->environment('local', 'testing')) {
@@ -23,8 +23,12 @@ class UserSeeder extends Seeder
             $password = 'password';
         }
 
+        if (! is_string($password)) {
+            throw new \RuntimeException('SEED_ADMIN_PASSWORD deve essere una stringa.');
+        }
+
         $users = [
-            ['Admin ContentU',   env('SEED_ADMIN_EMAIL', 'admin@example.com'), UserRole::Admin],
+            ['Admin ContentU',   config('ped.seed.admin_email'), UserRole::Admin],
             ['Account Manager',  'am@example.com',                             UserRole::AccountManager],
             ['Copywriter',       'copy@example.com',                           UserRole::Copywriter],
         ];

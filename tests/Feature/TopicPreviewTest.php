@@ -30,7 +30,7 @@ it('mostra al cliente i mesi con i badge di stato corretti', function () {
     $user = User::factory()->client()->create();
     $user->clients()->attach($client);
 
-    $this->actingAs($user)->get("/ped/{$link->token}/argomenti")
+    $this->actingAs($user)->get("/ped/{$client->slug}/argomenti")
         ->assertInertia(fn ($page) => $page
             ->component('public-ped/topic-preview')
             ->has('months', 2)
@@ -69,7 +69,7 @@ it('registra una approvazione con modifiche e avvisa il team', function () {
     $user->clients()->attach($client);
 
     $this->actingAs($user)
-        ->post("/ped/{$link->token}/topics/{$preview->id}/respond", [
+        ->post("/ped/{$client->slug}/topics/{$preview->id}/respond", [
             'status' => 'approved_with_notes',
             'comment' => 'Va bene, ma spostiamo il tema olio a novembre.',
         ]);
@@ -88,7 +88,7 @@ it('richiede un commento quando la risposta non è una approvazione piena', func
     $user->clients()->attach($client);
 
     $this->actingAs($user)
-        ->post("/ped/{$link->token}/topics/{$preview->id}/respond", ['status' => 'revise'])
+        ->post("/ped/{$client->slug}/topics/{$preview->id}/respond", ['status' => 'revise'])
         ->assertSessionHasErrors('comment');
 });
 
@@ -125,6 +125,6 @@ it('non espone la pre-verifica di un altro cliente', function () {
     $userA = User::factory()->client()->create();
     $userA->clients()->attach($clientA);
 
-    $this->actingAs($userA)->get("/ped/{$linkA->token}/argomenti")
+    $this->actingAs($userA)->get("/ped/{$clientA->slug}/argomenti")
         ->assertDontSee('RISERVATO CLIENTE B');
 });

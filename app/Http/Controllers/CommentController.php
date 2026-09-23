@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Content;
 use App\Notifications\NewCommentPosted;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
@@ -13,7 +14,7 @@ class CommentController extends Controller
 {
     use AuthorizesRequests;
 
-    public function store(Request $request, Content $content)
+    public function store(Request $request, Content $content): RedirectResponse
     {
         $this->authorize('comment', $content);
 

@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\ClientPublicLink;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 
 class PublicLinkController extends Controller
 {
     use AuthorizesRequests;
 
-    public function store(Client $client)
+    public function store(Client $client): RedirectResponse
     {
         $this->authorize('update', $client);
 
@@ -26,7 +27,7 @@ class PublicLinkController extends Controller
         return back();
     }
 
-    public function destroy(ClientPublicLink $link)
+    public function destroy(ClientPublicLink $link): RedirectResponse
     {
         $this->authorize('update', $link->client);
 

@@ -7,16 +7,20 @@ use App\Models\Content;
 use App\Models\ContentType;
 use App\Models\Quarter;
 use App\Models\Tag;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ContentController extends Controller
 {
     use AuthorizesRequests;
 
-    public function create(Quarter $quarter)
+    public function create(Quarter $quarter): Response
     {
         $this->authorize('update', $quarter->client);
 
@@ -28,7 +32,7 @@ class ContentController extends Controller
         ]);
     }
 
-    public function store(Request $request, Quarter $quarter)
+    public function store(Request $request, Quarter $quarter): RedirectResponse
     {
         $this->authorize('update', $quarter->client);
 
@@ -44,7 +48,7 @@ class ContentController extends Controller
         return to_route('contents.edit', $content);
     }
 
-    public function edit(Content $content)
+    public function edit(Content $content): Response
     {
         $this->authorize('update', $content->quarter->client);
 
@@ -71,7 +75,7 @@ class ContentController extends Controller
         ]);
     }
 
-    public function update(Request $request, Content $content)
+    public function update(Request $request, Content $content): RedirectResponse
     {
         $this->authorize('update', $content->quarter->client);
 
@@ -87,7 +91,7 @@ class ContentController extends Controller
         return back();
     }
 
-    public function destroy(Content $content)
+    public function destroy(Content $content): RedirectResponse
     {
         $this->authorize('update', $content->quarter->client);
 
@@ -99,7 +103,7 @@ class ContentController extends Controller
         return to_route('quarters.show', $quarter);
     }
 
-    public function updateStatus(Request $request, Content $content)
+    public function updateStatus(Request $request, Content $content): RedirectResponse
     {
         $target = ContentStatus::from($request->validate([
             'status' => ['required', Rule::enum(ContentStatus::class)],
@@ -132,6 +136,7 @@ class ContentController extends Controller
         return back();
     }
 
+    /** @return array<string, mixed> */
     private function validated(Request $request): array
     {
         return $request->validate([
@@ -149,6 +154,7 @@ class ContentController extends Controller
         ]);
     }
 
+    /** @return array<string, mixed> */
     private function quarterPayload(Quarter $quarter): array
     {
         return [
@@ -161,7 +167,8 @@ class ContentController extends Controller
         ];
     }
 
-    private function contentTypesPayload()
+    /** @return SupportCollection<int, array{id: int<0, max>, label: string, requiresSecondaryAsset: bool}> */
+    private function contentTypesPayload(): SupportCollection
     {
         return ContentType::active()->get()->map(fn (ContentType $type) => [
             'id' => $type->id,
@@ -170,7 +177,8 @@ class ContentController extends Controller
         ]);
     }
 
-    private function tagsPayload(Quarter $quarter)
+    /** @return Collection<int, Tag> */
+    private function tagsPayload(Quarter $quarter): Collection
     {
         return Tag::where('client_id', $quarter->client_id)
             ->orWhereNull('client_id')

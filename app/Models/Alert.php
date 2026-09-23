@@ -22,16 +22,22 @@ class Alert extends Model
         return ['type' => AlertType::class, 'resolved_at' => 'datetime'];
     }
 
+    /** @return BelongsTo<Client, $this> */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
+    /** @return MorphTo<Model, $this> */
     public function subject(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @param  Builder<Alert>  $query
+     * @return Builder<Alert>
+     */
     public function scopeOpen(Builder $query): Builder
     {
         return $query->whereNull('resolved_at');

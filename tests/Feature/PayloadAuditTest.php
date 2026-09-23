@@ -43,12 +43,12 @@ it('AUDIT — nessuna rotta pubblica espone chiavi riservate', function () {
         // niente header X-Inertia-Version fittizio, che farebbe rispondere 409
         // con corpo vuoto e renderebbe il controllo un falso positivo.
         $json = $this->actingAs($user)
-            ->get("/ped/{$link->token}{$suffix}")
+            ->get("/ped/{$client->slug}{$suffix}")
             ->getContent();
 
         foreach (FORBIDDEN_KEYS as $key) {
             expect($json)->not->toContain($key,
-                "La rotta /ped/{token}{$suffix} espone la chiave riservata «{$key}».");
+                "La rotta /ped/{slug}{$suffix} espone la chiave riservata «{$key}».");
         }
     }
 });

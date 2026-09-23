@@ -110,14 +110,14 @@ class CheckPedAlerts extends Command
         foreach ([CarbonImmutable::now(), CarbonImmutable::now()->addMonth()] as $month) {
             WorkloadCalculator::forMonth($month)
                 ->filter(fn ($row) => $row['days'] > $max)
-                ->each(function ($row) use ($month, &$raised, $max) {
+                ->each(function (array $row) use ($month, &$raised, $max) {
                     $user = User::find($row['userId']);
 
                     // L'alert non è legato a un cliente specifico: si usa il primo cliente
                     // attivo come ancoraggio, oppure si salta se non ce ne sono.
                     $client = Client::where('status', 'active')->first();
 
-                    if ($client) {
+                    if ($client && $user) {
                         $raised += Alert::raise(
                             $client, AlertType::ShootingOverload, $user,
                             "{$user->name} ha {$row['days']} giornate di shooting a "

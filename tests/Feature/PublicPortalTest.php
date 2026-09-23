@@ -9,26 +9,27 @@ use App\Notifications\ClientActionTaken;
 use App\Notifications\PedReadyForReview;
 use Illuminate\Support\Facades\Notification;
 
-it('restituisce 404 su un token inesistente senza rivelare nulla', function () {
-    $this->get('/ped/token-inventato')->assertNotFound();
+it('restituisce 404 su uno slug inesistente senza rivelare nulla', function () {
+    $this->get('/ped/cliente-inventato')->assertNotFound();
 });
 
-it('restituisce 404 su un token revocato', function () {
-    $link = ClientPublicLink::factory()->create(['revoked_at' => now()]);
+it('restituisce 404 se il cliente non ha nessun link attivo', function () {
+    $client = Client::factory()->create();
+    ClientPublicLink::factory()->for($client)->create(['revoked_at' => now()]);
 
-    $this->get("/ped/{$link->token}")->assertNotFound();
+    $this->get("/ped/{$client->slug}")->assertNotFound();
 });
 
 it('IMPEDISCE al cliente A di aprire il link del cliente B', function () {
     $clientA = Client::factory()->create();
     $clientB = Client::factory()->create();
 
-    $linkB = ClientPublicLink::factory()->for($clientB)->create();
+    ClientPublicLink::factory()->for($clientB)->create();
 
     $userA = User::factory()->client()->create();
     $userA->clients()->attach($clientA);
 
-    $this->actingAs($userA)->get("/ped/{$linkB->token}")->assertNotFound();
+    $this->actingAs($userA)->get("/ped/{$clientB->slug}")->assertNotFound();
 });
 
 it('non espone mai le note interne del cliente nelle props', function () {
@@ -42,7 +43,7 @@ it('non espone mai le note interne del cliente nelle props', function () {
     $user = User::factory()->client()->create();
     $user->clients()->attach($client);
 
-    $response = $this->actingAs($user)->get("/ped/{$link->token}/feed");
+    $response = $this->actingAs($user)->get("/ped/{$client->slug}/feed");
 
     $response->assertDontSee('SEGRETO', escape: false);
     $response->assertInertia(fn ($page) => $page
@@ -62,7 +63,7 @@ it('con visibility approved_only non espone le bozze', function () {
     $user = User::factory()->client()->create();
     $user->clients()->attach($client);
 
-    $this->actingAs($user)->get("/ped/{$link->token}/feed")
+    $this->actingAs($user)->get("/ped/{$client->slug}/feed")
         ->assertInertia(fn ($page) => $page->has('contents', 1))
         ->assertDontSee('BOZZA RISERVATA');
 });
@@ -76,7 +77,7 @@ it('non offre mai al cliente la modifica del testo', function () {
     $user = User::factory()->client()->create();
     $user->clients()->attach($client);
 
-    $this->actingAs($user)->get("/ped/{$link->token}/feed")
+    $this->actingAs($user)->get("/ped/{$client->slug}/feed")
         ->assertInertia(fn ($page) => $page->where('actions.canEdit', false));
 });
 
@@ -95,7 +96,7 @@ it('un rifiuto porta il contenuto in richiesta modifica e avvisa il team', funct
     $user->clients()->attach($client);
 
     $this->actingAs($user)
-        ->post("/ped/{$link->token}/contents/{$content->id}/reject", [
+        ->post("/ped/{$client->slug}/contents/{$content->id}/reject", [
             'comment' => 'La caption non rispecchia il tono del brand.',
         ]);
 
@@ -113,7 +114,7 @@ it('rifiuta un rifiuto senza commento', function () {
     $user->clients()->attach($client);
 
     $this->actingAs($user)
-        ->post("/ped/{$link->token}/contents/{$content->id}/reject", [])
+        ->post("/ped/{$client->slug}/contents/{$content->id}/reject", [])
         ->assertSessionHasErrors('comment');
 });
 

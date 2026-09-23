@@ -1,6 +1,5 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
 import {
     ClientForm,
     type AssignableUser,
@@ -92,18 +91,26 @@ export default function ClientsEdit({
     publicLink,
 }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title={`Modifica ${client.name}`} />
 
-            <h1 className="font-serif text-2xl">Modifica {client.name}</h1>
+            <div className="p-4 md:p-6">
+                <h1 className="font-serif text-2xl">Modifica {client.name}</h1>
 
-            <div className="mt-6">
-                <ClientForm client={client} assignableUsers={assignableUsers} />
-            </div>
+                <div className="mt-6">
+                    <ClientForm
+                        client={client}
+                        assignableUsers={assignableUsers}
+                    />
+                </div>
 
-            <div className="mt-8">
-                <PublicLinkPanel clientId={client.id} publicLink={publicLink} />
+                <div className="mt-8">
+                    <PublicLinkPanel
+                        clientId={client.id}
+                        publicLink={publicLink}
+                    />
+                </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

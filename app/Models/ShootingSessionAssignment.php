@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/** @property ShootingRole $role */
 class ShootingSessionAssignment extends Model
 {
     /** @use HasFactory<ShootingSessionAssignmentFactory> */
@@ -23,11 +24,13 @@ class ShootingSessionAssignment extends Model
         ];
     }
 
+    /** @return BelongsTo<ShootingSession, $this> */
     public function session(): BelongsTo
     {
         return $this->belongsTo(ShootingSession::class, 'shooting_session_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

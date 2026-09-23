@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Client>
@@ -17,8 +18,13 @@ class ClientFactory extends Factory
      */
     public function definition(): array
     {
+        // Non lasciarlo all'evento "creating" del model: i seeder demo girano
+        // con WithoutModelEvents (DatabaseSeeder), che lo disattiverebbe.
+        $name = fake()->unique()->company();
+
         return [
-            'name' => fake()->company(),
+            'name' => $name,
+            'slug' => Str::slug($name),
             'brand_name' => null,
             'status' => 'active',
             'contacts' => [[

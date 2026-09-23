@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([UserSeeder::class, ContentTypeSeeder::class]);
 
         if (app()->environment('local', 'testing')) {
-            $this->call([DemoSeeder::class]);
+            $this->call([DemoSeeder::class, ContentDemoSeeder::class, ShootingDemoSeeder::class]);
         }
     }
 }

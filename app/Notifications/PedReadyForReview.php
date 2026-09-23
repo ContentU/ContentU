@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Models\ClientPublicLink;
 use App\Models\Quarter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,7 +14,6 @@ class PedReadyForReview extends Notification implements ShouldQueue
 
     public function __construct(
         public Quarter $quarter,
-        public ClientPublicLink $link,
     ) {}
 
     /**
@@ -31,7 +29,7 @@ class PedReadyForReview extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("Il tuo PED {$this->quarter->label} è pronto per la revisione")
             ->line("Il piano editoriale {$this->quarter->label} è pronto: puoi rivederlo, approvarlo o commentarlo.")
-            ->action('Apri il PED', url("/ped/{$this->link->token}"));
+            ->action('Apri il PED', url("/ped/{$this->quarter->client->slug}"));
     }
 
     /**
@@ -42,7 +40,7 @@ class PedReadyForReview extends Notification implements ShouldQueue
         return [
             'title' => 'PED pronto per la revisione',
             'message' => "Il piano editoriale {$this->quarter->label} è pronto per la revisione.",
-            'url' => url("/ped/{$this->link->token}"),
+            'url' => url("/ped/{$this->quarter->client->slug}"),
             'clientName' => $this->quarter->client->name,
         ];
     }

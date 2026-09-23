@@ -29,11 +29,11 @@ export default function PublicPedFeed({
 
     const selected = contents.find((c) => c.id === selectedId) ?? null;
 
-    const token = window.location.pathname.split('/')[2];
+    const clientSlug = window.location.pathname.split('/')[2];
 
     const approve = () => {
         if (!selected) return;
-        router.post(`/ped/${token}/contents/${selected.id}/approve`);
+        router.post(`/ped/${clientSlug}/contents/${selected.id}/approve`);
     };
 
     // Il rifiuto richiede sempre un motivo esplicito (§3.7): form inline,
@@ -41,14 +41,14 @@ export default function PublicPedFeed({
     const reject = (comment?: string) => {
         if (!selected || !comment) return;
 
-        router.post(`/ped/${token}/contents/${selected.id}/reject`, {
+        router.post(`/ped/${clientSlug}/contents/${selected.id}/reject`, {
             comment,
         });
     };
 
     const submitComment = (body: string) => {
         if (!selected) return;
-        router.post(`/ped/${token}/contents/${selected.id}/comment`, {
+        router.post(`/ped/${clientSlug}/contents/${selected.id}/comment`, {
             body,
         });
     };

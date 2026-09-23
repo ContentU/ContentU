@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $key
+ * @property string $label
+ * @property bool $requires_secondary_asset
+ */
 class ContentType extends Model
 {
     /** @use HasFactory<ContentTypeFactory> */
@@ -23,11 +28,16 @@ class ContentType extends Model
         ];
     }
 
+    /** @return HasMany<Content, $this> */
     public function contents(): HasMany
     {
         return $this->hasMany(Content::class);
     }
 
+    /**
+     * @param  Builder<ContentType>  $query
+     * @return Builder<ContentType>
+     */
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true)->orderBy('sort_order');

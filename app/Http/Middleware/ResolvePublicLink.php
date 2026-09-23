@@ -2,27 +2,35 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Client;
 use App\Models\ClientPublicLink;
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ResolvePublicLink
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        $link = ClientPublicLink::with('client')
-            ->where('token', $request->route('token'))
-            ->whereNull('revoked_at')
-            ->first();
+        $client = Client::where('slug', $request->route('clientSlug'))->first();
 
-        // 404 generico: non rivelare se il token è inesistente, revocato,
-        // o se il cliente esiste. Nessun messaggio diverso fra i casi.
+        $link = $client
+            ? ClientPublicLink::where('client_id', $client->id)
+                ->whereNull('revoked_at')
+                ->latest()
+                ->first()
+            : null;
+
+        // 404 generico: non rivelare se lo slug è inesistente, se l'accesso è
+        // stato revocato, o se il cliente esiste. Nessun messaggio diverso fra i casi.
         abort_if($link === null, 404);
+
+        $link->setRelation('client', $client);
 
         // Serve a CreateNewUser (Fase 01.5) per legare il nuovo utente
         // al cliente giusto. Solo scalari: la sessione è serializzata in JSON.
         $request->session()->put('ped.public_link.client_id', $link->client_id);
-        $request->session()->put('ped.public_link.token', $link->token);
+        $request->session()->put('ped.public_link.client_slug', $client->slug);
 
         $user = $request->user();
 

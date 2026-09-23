@@ -13,33 +13,35 @@ use App\Models\User;
 use App\Notifications\ClientActionTaken;
 use App\Notifications\TopicPreviewResponded;
 use App\Support\TopicSynthesis;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class PublicPedController extends Controller
 {
-    public function entry(Request $request, string $token)
+    public function entry(Request $request, string $clientSlug): Response|RedirectResponse
     {
         $link = $this->link($request);
         $user = $request->user();
 
         if ($user !== null) {
-            return to_route('ped.feed', $token);
+            return to_route('ped.feed', $clientSlug);
         }
 
         return Inertia::render('public-ped/entry', [
             'client' => $this->clientPayload($link->client),
-            'token' => $token,
+            'clientSlug' => $clientSlug,
             'mode' => null,
             'email' => null,
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]);
     }
 
-    public function checkEmail(Request $request, string $token)
+    public function checkEmail(Request $request, string $clientSlug): Response
     {
         $link = $this->link($request);
 
@@ -54,14 +56,14 @@ class PublicPedController extends Controller
 
         return Inertia::render('public-ped/entry', [
             'client' => $this->clientPayload($link->client),
-            'token' => $token,
+            'clientSlug' => $clientSlug,
             'mode' => $exists ? 'login' : 'register',
             'email' => $data['email'],
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]);
     }
 
-    public function topics(Request $request, string $token)
+    public function topics(Request $request, string $clientSlug): Response
     {
         $link = $this->link($request);
         $quarter = $this->currentQuarter($link->client);
@@ -98,7 +100,7 @@ class PublicPedController extends Controller
         ]);
     }
 
-    public function respondToTopics(Request $request, string $token, TopicPreview $topicPreview)
+    public function respondToTopics(Request $request, string $clientSlug, TopicPreview $topicPreview): RedirectResponse
     {
         $link = $this->link($request);
 
@@ -126,7 +128,7 @@ class PublicPedController extends Controller
         return back();
     }
 
-    public function feed(Request $request, string $token)
+    public function feed(Request $request, string $clientSlug): Response
     {
         $link = $this->link($request);
         $quarter = $this->currentQuarter($link->client);
@@ -152,7 +154,7 @@ class PublicPedController extends Controller
         ]);
     }
 
-    public function shooting(Request $request, string $token)
+    public function shooting(Request $request, string $clientSlug): Response
     {
         $link = $this->link($request);
 
@@ -166,7 +168,7 @@ class PublicPedController extends Controller
         ]);
     }
 
-    public function approve(Request $request, string $token, Content $content)
+    public function approve(Request $request, string $clientSlug, Content $content): RedirectResponse
     {
         $link = $this->link($request);
 
@@ -183,7 +185,7 @@ class PublicPedController extends Controller
         return back();
     }
 
-    public function reject(Request $request, string $token, Content $content)
+    public function reject(Request $request, string $clientSlug, Content $content): RedirectResponse
     {
         $link = $this->link($request);
 
@@ -202,7 +204,7 @@ class PublicPedController extends Controller
         return back();
     }
 
-    public function comment(Request $request, string $token, Content $content)
+    public function comment(Request $request, string $clientSlug, Content $content): RedirectResponse
     {
         $link = $this->link($request);
 
@@ -232,7 +234,11 @@ class PublicPedController extends Controller
             ?? $client->quarters()->orderByDesc('year')->orderByDesc('quarter_number')->first();
     }
 
-    /** Solo i campi pubblici del cliente: mai note interne, tone of voice, dati di altri clienti. */
+    /**
+     * Solo i campi pubblici del cliente: mai note interne, tone of voice, dati di altri clienti.
+     *
+     * @return array{name: string, initials: string, logoUrl: string|null}
+     */
     private function clientPayload(Client $client): array
     {
         return [

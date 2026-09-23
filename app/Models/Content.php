@@ -9,9 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 // TODO v1.1: log attività (chi ha creato/modificato/approvato cosa) — S rimandata, vedi PIANO_SVILUPPO_PED.md §3.6
 // TODO v2:   assegnazione contenuti a un membro specifico — C fuori v1, vedi §3.6
+/**
+ * @property ContentStatus $status
+ * @property Carbon $publish_at
+ */
 class Content extends Model
 {
     /** @use HasFactory<ContentFactory> */
@@ -31,21 +36,25 @@ class Content extends Model
         ];
     }
 
+    /** @return BelongsTo<Quarter, $this> */
     public function quarter(): BelongsTo
     {
         return $this->belongsTo(Quarter::class);
     }
 
+    /** @return BelongsTo<ContentType, $this> */
     public function contentType(): BelongsTo
     {
         return $this->belongsTo(ContentType::class);
     }
 
+    /** @return BelongsToMany<Tag, $this> */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
     }
 
+    /** @return HasMany<Comment, $this> */
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
@@ -126,6 +135,8 @@ class Content extends Model
     {
         $this->loadMissing('contentType', 'tags', 'comments.author');
 
+        $this->publish_at->locale('it');
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -134,7 +145,7 @@ class Content extends Model
             'resourceUrl' => $this->resource_url,
             'coverResourceUrl' => $this->cover_resource_url,
             'publishAt' => $this->publish_at->toIso8601String(),
-            'publishAtLabel' => $this->publish_at->locale('it')->translatedFormat('D j M'),
+            'publishAtLabel' => $this->publish_at->translatedFormat('D j M'),
             'status' => $this->status->value,
             'typeLabel' => mb_strtoupper($this->contentType->label),
             'typeKey' => $this->contentType->key,
@@ -147,13 +158,17 @@ class Content extends Model
             'comments' => $this->comments
                 ->sortBy('created_at')
                 ->values()
-                ->map(fn (Comment $comment) => [
-                    'id' => $comment->id,
-                    'authorLabel' => $comment->authorLabel(),
-                    'authorName' => $comment->author->name,
-                    'body' => $comment->body,
-                    'createdAtLabel' => $comment->created_at->locale('it')->translatedFormat('j M, H:i'),
-                ])->all(),
+                ->map(function (Comment $comment) {
+                    $comment->created_at?->locale('it');
+
+                    return [
+                        'id' => $comment->id,
+                        'authorLabel' => $comment->authorLabel(),
+                        'authorName' => $comment->author->name,
+                        'body' => $comment->body,
+                        'createdAtLabel' => $comment->created_at?->translatedFormat('j M, H:i'),
+                    ];
+                })->all(),
         ];
     }
 }

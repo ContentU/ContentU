@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import {
     ContentForm,
     type ContentTag,
@@ -30,24 +29,26 @@ export default function ContentsEdit({
     readiness,
 }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title={`${content.title} — ${quarter.label}`} />
 
-            <p className="text-sm text-muted-foreground">
-                {quarter.client.name} — {quarter.label}
-            </p>
-            <h1 className="font-serif text-2xl">{content.title}</h1>
+            <div className="p-4 md:p-6">
+                <p className="text-sm text-muted-foreground">
+                    {quarter.client.name} — {quarter.label}
+                </p>
+                <h1 className="font-serif text-2xl">{content.title}</h1>
 
-            <div className="mt-6">
-                <ContentForm
-                    quarterId={quarter.id}
-                    contentTypes={contentTypes}
-                    tags={tags}
-                    channels={channels}
-                    content={content}
-                    readiness={readiness}
-                />
+                <div className="mt-6">
+                    <ContentForm
+                        quarterId={quarter.id}
+                        contentTypes={contentTypes}
+                        tags={tags}
+                        channels={channels}
+                        content={content}
+                        readiness={readiness}
+                    />
+                </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

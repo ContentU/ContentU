@@ -79,7 +79,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->role->isInternal();
     }
 
-    /** Clienti a cui questo utente è assegnato (team) o di cui è il referente (cliente esterno). */
+    /**
+     * Clienti a cui questo utente è assegnato (team) o di cui è il referente (cliente esterno).
+     *
+     * @return BelongsToMany<Client, $this>
+     */
     public function clients(): BelongsToMany
     {
         return $this->belongsToMany(Client::class)->withTimestamps();

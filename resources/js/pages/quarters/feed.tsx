@@ -1,6 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
 import { ContentDetailPanel } from '@/components/feed/content-detail-panel';
 import { ContentGridView } from '@/components/feed/content-grid-view';
 import { ContentListView } from '@/components/feed/content-list-view';
@@ -55,106 +54,110 @@ export default function QuarterFeed({
     };
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Feed — ${quarter.label}`} />
 
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <p className="text-sm text-muted-foreground">
-                        {client.name}
-                    </p>
-                    <h1 className="font-serif text-2xl">
-                        Feed — {quarter.label}
-                    </h1>
-                </div>
-                <StatusBadge
-                    status={quarter.status}
-                    label={quarter.statusLabel}
-                />
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex gap-2">
-                    <Button
-                        type="button"
-                        size="sm"
-                        variant={layout === 'grid' ? 'default' : 'outline'}
-                        onClick={() => changeLayout('grid')}
-                    >
-                        Griglia
-                    </Button>
-                    <Button
-                        type="button"
-                        size="sm"
-                        variant={layout === 'list' ? 'default' : 'outline'}
-                        onClick={() => changeLayout('list')}
-                    >
-                        Elenco
-                    </Button>
-                </div>
-
-                <div className="flex gap-2">
-                    <Button
-                        asChild
-                        size="sm"
-                        variant={view === 'all' ? 'default' : 'outline'}
-                    >
-                        <Link href={`/quarters/${quarter.id}/feed`}>
-                            Intero PED
-                        </Link>
-                    </Button>
-                    <Button
-                        asChild
-                        size="sm"
-                        variant={view === 'published' ? 'default' : 'outline'}
-                    >
-                        <Link
-                            href={`/quarters/${quarter.id}/feed?view=published`}
-                        >
-                            Solo pubblicati
-                        </Link>
-                    </Button>
-                </div>
-            </div>
-
-            <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
-                <div>
-                    {layout === 'grid' ? (
-                        <ContentGridView
-                            contents={contents}
-                            selectedId={selectedId}
-                            onSelect={setSelectedId}
-                        />
-                    ) : (
-                        <ContentListView
-                            contents={contents}
-                            selectedId={selectedId}
-                            onSelect={setSelectedId}
-                        />
-                    )}
-
-                    {contents.length === 0 && (
-                        <p className="mt-10 text-center text-sm text-muted-foreground">
-                            Nessun contenuto da mostrare.
+            <div className="p-4 md:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p className="text-sm text-muted-foreground">
+                            {client.name}
                         </p>
-                    )}
+                        <h1 className="font-serif text-2xl">
+                            Feed — {quarter.label}
+                        </h1>
+                    </div>
+                    <StatusBadge
+                        status={quarter.status}
+                        label={quarter.statusLabel}
+                    />
                 </div>
 
-                <ContentDetailPanel
-                    content={selected}
-                    actions={actions}
-                    onSendToReview={() => updateStatus('in_review')}
-                    onApprove={() => updateStatus('approved')}
-                    onReject={() => updateStatus('needs_changes')}
-                    onResumeToDraft={() => updateStatus('draft')}
-                    onSubmitComment={(body) => {
-                        if (!selected) return;
-                        router.post(`/contents/${selected.id}/comments`, {
-                            body,
-                        });
-                    }}
-                />
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex gap-2">
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant={layout === 'grid' ? 'default' : 'outline'}
+                            onClick={() => changeLayout('grid')}
+                        >
+                            Griglia
+                        </Button>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant={layout === 'list' ? 'default' : 'outline'}
+                            onClick={() => changeLayout('list')}
+                        >
+                            Elenco
+                        </Button>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <Button
+                            asChild
+                            size="sm"
+                            variant={view === 'all' ? 'default' : 'outline'}
+                        >
+                            <Link href={`/quarters/${quarter.id}/feed`}>
+                                Intero PED
+                            </Link>
+                        </Button>
+                        <Button
+                            asChild
+                            size="sm"
+                            variant={
+                                view === 'published' ? 'default' : 'outline'
+                            }
+                        >
+                            <Link
+                                href={`/quarters/${quarter.id}/feed?view=published`}
+                            >
+                                Solo pubblicati
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
+                    <div>
+                        {layout === 'grid' ? (
+                            <ContentGridView
+                                contents={contents}
+                                selectedId={selectedId}
+                                onSelect={setSelectedId}
+                            />
+                        ) : (
+                            <ContentListView
+                                contents={contents}
+                                selectedId={selectedId}
+                                onSelect={setSelectedId}
+                            />
+                        )}
+
+                        {contents.length === 0 && (
+                            <p className="mt-10 text-center text-sm text-muted-foreground">
+                                Nessun contenuto da mostrare.
+                            </p>
+                        )}
+                    </div>
+
+                    <ContentDetailPanel
+                        content={selected}
+                        actions={actions}
+                        onSendToReview={() => updateStatus('in_review')}
+                        onApprove={() => updateStatus('approved')}
+                        onReject={() => updateStatus('needs_changes')}
+                        onResumeToDraft={() => updateStatus('draft')}
+                        onSubmitComment={(body) => {
+                            if (!selected) return;
+                            router.post(`/contents/${selected.id}/comments`, {
+                                body,
+                            });
+                        }}
+                    />
+                </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

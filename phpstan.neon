@@ -11,3 +11,9 @@ parameters:
         - routes/
 
     level: 7
+
+    # Larastan can only see enum/cast types declared via the Laravel 11+ `casts()` method
+    # (as used throughout app/Models) if it statically parses that method's AST; otherwise
+    # every cast falls back to its raw database type (e.g. `$client->status` typed as
+    # `string` instead of `ClientStatus`), which is a false positive, not a real bug.
+    parseModelCastsMethod: true

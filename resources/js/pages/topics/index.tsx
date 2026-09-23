@@ -1,5 +1,4 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -214,58 +213,62 @@ export default function TopicsIndex({ quarter, months }: Props) {
     };
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Argomenti — ${quarter.label}`} />
 
-            <p className="text-sm text-muted-foreground">
-                {quarter.client.name}
-            </p>
-            <h1 className="font-serif text-2xl">
-                Pre-verifica argomenti — {quarter.label}
-            </h1>
+            <div className="p-4 md:p-6">
+                <p className="text-sm text-muted-foreground">
+                    {quarter.client.name}
+                </p>
+                <h1 className="font-serif text-2xl">
+                    Pre-verifica argomenti — {quarter.label}
+                </h1>
 
-            <div className="mt-6 space-y-6">
-                {months.map((month) => (
-                    <MonthBlock key={month.id} month={month} />
-                ))}
+                <div className="mt-6 space-y-6">
+                    {months.map((month) => (
+                        <MonthBlock key={month.id} month={month} />
+                    ))}
 
-                {months.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                        Nessun mese ancora aggiunto alla pre-verifica.
-                    </p>
-                )}
+                    {months.length === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                            Nessun mese ancora aggiunto alla pre-verifica.
+                        </p>
+                    )}
+                </div>
+
+                <form
+                    onSubmit={addMonth}
+                    className="mt-8 flex max-w-sm items-end gap-3"
+                >
+                    <div className="grid gap-2">
+                        <Label htmlFor="month_label">Mese</Label>
+                        <Input
+                            id="month_label"
+                            value={data.month_label}
+                            onChange={(e) =>
+                                setData('month_label', e.target.value)
+                            }
+                            required
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="month_order">Ordine</Label>
+                        <Input
+                            id="month_order"
+                            type="number"
+                            min={1}
+                            max={12}
+                            value={data.month_order}
+                            onChange={(e) =>
+                                setData('month_order', Number(e.target.value))
+                            }
+                        />
+                    </div>
+                    <Button type="submit" disabled={processing}>
+                        Aggiungi mese
+                    </Button>
+                </form>
             </div>
-
-            <form
-                onSubmit={addMonth}
-                className="mt-8 flex max-w-sm items-end gap-3"
-            >
-                <div className="grid gap-2">
-                    <Label htmlFor="month_label">Mese</Label>
-                    <Input
-                        id="month_label"
-                        value={data.month_label}
-                        onChange={(e) => setData('month_label', e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="month_order">Ordine</Label>
-                    <Input
-                        id="month_order"
-                        type="number"
-                        min={1}
-                        max={12}
-                        value={data.month_order}
-                        onChange={(e) =>
-                            setData('month_order', Number(e.target.value))
-                        }
-                    />
-                </div>
-                <Button type="submit" disabled={processing}>
-                    Aggiungi mese
-                </Button>
-            </form>
-        </AppLayout>
+        </>
     );
 }

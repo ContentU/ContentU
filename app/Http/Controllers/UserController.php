@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         return Inertia::render('settings/users', [
             'users' => User::whereIn('role', UserRole::internal())
@@ -33,7 +35,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -54,7 +56,7 @@ class UserController extends Controller
         return back();
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user): RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -68,7 +70,7 @@ class UserController extends Controller
         return back();
     }
 
-    public function toggleActive(Request $request, User $user)
+    public function toggleActive(Request $request, User $user): RedirectResponse
     {
         abort_if($user->id === $request->user()->id, 422, 'Non puoi disattivare te stesso.');
 

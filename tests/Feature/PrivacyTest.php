@@ -15,9 +15,9 @@ it('SICUREZZA — un utente cliente non accede al link di un altro cliente', fun
     $userA = User::factory()->client()->create();
     $userA->clients()->attach($a);
 
-    $this->actingAs($userA)->get("/ped/{$linkB->token}")->assertNotFound();
-    $this->actingAs($userA)->get("/ped/{$linkB->token}/feed")->assertNotFound();
-    $this->actingAs($userA)->get("/ped/{$linkB->token}/argomenti")->assertNotFound();
+    $this->actingAs($userA)->get("/ped/{$b->slug}")->assertNotFound();
+    $this->actingAs($userA)->get("/ped/{$b->slug}/feed")->assertNotFound();
+    $this->actingAs($userA)->get("/ped/{$b->slug}/argomenti")->assertNotFound();
 });
 
 it('SICUREZZA — un utente cliente non raggiunge nessuna rotta interna', function () {
@@ -39,7 +39,7 @@ it('SICUREZZA — un cliente non può agire su un contenuto di un altro cliente'
     $userA->clients()->attach($a);
 
     $this->actingAs($userA)
-        ->post("/ped/{$linkA->token}/contents/{$contentB->id}/approve")
+        ->post("/ped/{$a->slug}/contents/{$contentB->id}/approve")
         ->assertNotFound();
 
     expect($contentB->fresh()->status->value)->toBe('approved');
@@ -78,7 +78,7 @@ it('SICUREZZA — nessuna prop Inertia pubblica contiene dati di altri clienti',
     // fittizio: farebbe rispondere 409 con corpo vuoto e il test passerebbe
     // sempre, a vuoto, senza controllare nulla.
     $json = $this->actingAs($userA)
-        ->get("/ped/{$linkA->token}/feed")
+        ->get("/ped/{$a->slug}/feed")
         ->getContent();
 
     expect($json)->not->toContain('ALTRO CLIENTE')

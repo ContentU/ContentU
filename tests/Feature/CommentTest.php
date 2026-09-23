@@ -20,7 +20,7 @@ it('etichetta correttamente un commento del cliente', function () {
     $user->clients()->attach($client);
 
     $this->actingAs($user)
-        ->post("/ped/{$link->token}/contents/{$content->id}/comment", [
+        ->post("/ped/{$client->slug}/contents/{$content->id}/comment", [
             'body' => 'La foto è troppo scura.',
         ]);
 

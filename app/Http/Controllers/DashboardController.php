@@ -8,10 +8,11 @@ use App\Models\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): Response
     {
         $user = $request->user();
         $status = $request->string('status')->toString();

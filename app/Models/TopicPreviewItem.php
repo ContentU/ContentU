@@ -17,16 +17,19 @@ class TopicPreviewItem extends Model
         'title', 'theme', 'objective', 'footnote', 'sort_order', 'content_id',
     ];
 
+    /** @return BelongsTo<TopicPreview, $this> */
     public function preview(): BelongsTo
     {
         return $this->belongsTo(TopicPreview::class, 'topic_preview_id');
     }
 
+    /** @return BelongsTo<ContentType, $this> */
     public function contentType(): BelongsTo
     {
         return $this->belongsTo(ContentType::class);
     }
 
+    /** @return BelongsTo<Content, $this> */
     public function content(): BelongsTo
     {
         return $this->belongsTo(Content::class);

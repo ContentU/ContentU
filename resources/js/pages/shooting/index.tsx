@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
-import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -91,10 +90,10 @@ export default function ShootingIndex({
     planningRules,
 }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Shooting" />
 
-            <div className="space-y-10 p-4">
+            <div className="space-y-10 p-4 md:p-6">
                 <Heading
                     variant="small"
                     title="Modulo Shooting"
@@ -117,7 +116,7 @@ export default function ShootingIndex({
 
                 <WorkloadBlock workload={workload} />
             </div>
-        </AppLayout>
+        </>
     );
 }
 

@@ -103,7 +103,7 @@ it('SICUREZZA — la vista cliente non espone mai nomi del team né note interne
     // Niente header X-Inertia-Version fittizio: farebbe rispondere 409 con
     // corpo vuoto e il test passerebbe sempre, a vuoto, senza controllare nulla.
     $json = $this->actingAs($user)
-        ->get("/ped/{$link->token}/shooting")
+        ->get("/ped/{$client->slug}/shooting")
         ->getContent();
 
     // Decisione B: solo data e tipo.
@@ -125,7 +125,7 @@ it('SICUREZZA — un cliente non vede le sessioni di un altro cliente', function
     $userA = User::factory()->client()->create();
     $userA->clients()->attach($a);
 
-    $this->actingAs($userA)->get("/ped/{$linkA->token}/shooting")
+    $this->actingAs($userA)->get("/ped/{$a->slug}/shooting")
         ->assertInertia(fn ($page) => $page->has('sessions', 0));
 });
 

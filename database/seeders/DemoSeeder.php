@@ -17,7 +17,7 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         if (! app()->environment('local', 'testing')) {
-            $this->command?->warn('DemoSeeder saltato: disponibile solo in local/testing.');
+            $this->command->warn('DemoSeeder saltato: disponibile solo in local/testing.');
 
             return;
         }

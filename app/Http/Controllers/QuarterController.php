@@ -9,16 +9,18 @@ use App\Models\Content;
 use App\Models\Quarter;
 use App\Notifications\PedReadyForReview;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class QuarterController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index(Client $client)
+    public function index(Client $client): Response
     {
         $this->authorize('view', $client);
 
@@ -40,7 +42,7 @@ class QuarterController extends Controller
         ]);
     }
 
-    public function store(Request $request, Client $client)
+    public function store(Request $request, Client $client): RedirectResponse
     {
         $this->authorize('update', $client);
 
@@ -72,7 +74,7 @@ class QuarterController extends Controller
         return back();
     }
 
-    public function show(Quarter $quarter)
+    public function show(Quarter $quarter): Response
     {
         $this->authorize('view', $quarter->client);
 
@@ -110,7 +112,7 @@ class QuarterController extends Controller
      * Feed del trimestre (griglia/elenco): un solo data layer, riusato anche
      * dal portale pubblico del cliente (Fase 07) tramite gli stati ammessi.
      */
-    public function feed(Request $request, Quarter $quarter)
+    public function feed(Request $request, Quarter $quarter): Response
     {
         $this->authorize('view', $quarter->client);
 
@@ -148,7 +150,7 @@ class QuarterController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, Quarter $quarter)
+    public function updateStatus(Request $request, Quarter $quarter): RedirectResponse
     {
         $this->authorize('update', $quarter->client);
 
@@ -171,11 +173,11 @@ class QuarterController extends Controller
 
         // Notifica al cliente quando il PED entra in revisione (§3.5 S, inclusa in v1).
         if ($wasDraft && $target === QuarterStatus::InReview) {
-            $link = $quarter->client->publicLinks()->whereNull('revoked_at')->latest()->first();
+            $hasActiveLink = $quarter->client->publicLinks()->whereNull('revoked_at')->exists();
 
-            if ($link) {
+            if ($hasActiveLink) {
                 $clientUsers = $quarter->client->users()->where('role', 'client')->get();
-                Notification::send($clientUsers, new PedReadyForReview($quarter, $link));
+                Notification::send($clientUsers, new PedReadyForReview($quarter));
             }
         }
 

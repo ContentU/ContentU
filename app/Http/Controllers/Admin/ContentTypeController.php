@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContentType;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ContentTypeController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         return Inertia::render('settings/content-types', [
             'contentTypes' => ContentType::orderBy('sort_order')
@@ -26,7 +28,7 @@ class ContentTypeController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
 
@@ -39,7 +41,7 @@ class ContentTypeController extends Controller
         return back();
     }
 
-    public function update(Request $request, ContentType $contentType)
+    public function update(Request $request, ContentType $contentType): RedirectResponse
     {
         $data = $this->validated($request, $contentType->id);
 
@@ -50,7 +52,7 @@ class ContentTypeController extends Controller
         return back();
     }
 
-    public function destroy(ContentType $contentType)
+    public function destroy(ContentType $contentType): RedirectResponse
     {
         if ($contentType->contents()->exists()) {
             return back()->withErrors([
@@ -65,6 +67,7 @@ class ContentTypeController extends Controller
         return back();
     }
 
+    /** @return array<string, mixed> */
     private function validated(Request $request, ?int $id = null): array
     {
         return $request->validate([

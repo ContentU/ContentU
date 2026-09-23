@@ -12,6 +12,8 @@ class WorkloadCalculator
     /**
      * Giornate di shooting per persona nel mese, per ruolo.
      * Le assegnazioni "alternative" NON contano: non sono confermate.
+     *
+     * @return Collection<int, array{userId: int, name: string, days: int<0, max>, byRole: Collection<int|string, int>, overTarget: bool, overMax: bool}>
      */
     public static function forMonth(CarbonImmutable $month): Collection
     {

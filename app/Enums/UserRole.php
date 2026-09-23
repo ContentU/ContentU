@@ -19,7 +19,11 @@ enum UserRole: string
         };
     }
 
-    /** Ruoli che appartengono al team interno dell'agenzia. */
+    /**
+     * Ruoli che appartengono al team interno dell'agenzia.
+     *
+     * @return list<self>
+     */
     public static function internal(): array
     {
         return [self::Admin, self::AccountManager, self::Copywriter];

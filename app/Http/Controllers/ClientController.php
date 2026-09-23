@@ -5,16 +5,19 @@ namespace App\Http\Controllers;
 use App\Enums\ClientStatus;
 use App\Models\Client;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ClientController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', Client::class);
 
@@ -48,7 +51,7 @@ class ClientController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(): Response
     {
         $this->authorize('create', Client::class);
 
@@ -57,7 +60,7 @@ class ClientController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $this->authorize('create', Client::class);
 
@@ -72,7 +75,7 @@ class ClientController extends Controller
         return to_route('clients.index');
     }
 
-    public function edit(Client $client)
+    public function edit(Client $client): Response
     {
         $this->authorize('update', $client);
 
@@ -94,6 +97,7 @@ class ClientController extends Controller
         ]);
     }
 
+    /** @return array<string, mixed>|null */
     private function publicLinkPayload(Client $client): ?array
     {
         $link = $client->publicLinks()->whereNull('revoked_at')->latest()->first();
@@ -104,12 +108,12 @@ class ClientController extends Controller
 
         return [
             'id' => $link->id,
-            'url' => url("/ped/{$link->token}"),
+            'url' => url("/ped/{$client->slug}"),
             'createdAt' => $link->created_at->format('d/m/Y H:i'),
         ];
     }
 
-    public function update(Request $request, Client $client)
+    public function update(Request $request, Client $client): RedirectResponse
     {
         $this->authorize('update', $client);
 
@@ -130,7 +134,7 @@ class ClientController extends Controller
         return to_route('clients.index');
     }
 
-    public function destroy(Client $client)
+    public function destroy(Client $client): RedirectResponse
     {
         $this->authorize('delete', $client);
 
@@ -141,6 +145,7 @@ class ClientController extends Controller
         return to_route('clients.index');
     }
 
+    /** @return array<string, mixed> */
     private function validated(Request $request): array
     {
         $validated = $request->validate([
@@ -169,7 +174,8 @@ class ClientController extends Controller
         return $validated;
     }
 
-    private function assignableUsers()
+    /** @return Collection<int, User> */
+    private function assignableUsers(): Collection
     {
         return User::whereIn('role', ['admin', 'account_manager', 'copywriter'])
             ->where('is_active', true)

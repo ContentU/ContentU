@@ -7,6 +7,7 @@ use App\Models\ContentType;
 use App\Models\TopicPreview;
 use App\Models\TopicPreviewItem;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,7 +15,7 @@ class TopicPreviewItemController extends Controller
 {
     use AuthorizesRequests;
 
-    public function store(Request $request, TopicPreview $topicPreview)
+    public function store(Request $request, TopicPreview $topicPreview): RedirectResponse
     {
         $this->authorize('update', $topicPreview->quarter->client);
 
@@ -28,7 +29,7 @@ class TopicPreviewItemController extends Controller
         return back();
     }
 
-    public function update(Request $request, TopicPreviewItem $item)
+    public function update(Request $request, TopicPreviewItem $item): RedirectResponse
     {
         $this->authorize('update', $item->preview->quarter->client);
 
@@ -39,7 +40,7 @@ class TopicPreviewItemController extends Controller
         return back();
     }
 
-    public function destroy(TopicPreviewItem $item)
+    public function destroy(TopicPreviewItem $item): RedirectResponse
     {
         $this->authorize('update', $item->preview->quarter->client);
 
@@ -51,7 +52,7 @@ class TopicPreviewItemController extends Controller
     }
 
     /** Trasforma un tema approvato in un contenuto reale. */
-    public function promote(TopicPreviewItem $item)
+    public function promote(TopicPreviewItem $item): RedirectResponse
     {
         $this->authorize('update', $item->preview->quarter->client);
 
@@ -70,6 +71,7 @@ class TopicPreviewItemController extends Controller
         return to_route('contents.edit', $content);
     }
 
+    /** @return array<string, mixed> */
     private function validated(Request $request): array
     {
         return $request->validate([
