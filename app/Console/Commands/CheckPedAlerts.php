@@ -27,8 +27,8 @@ class CheckPedAlerts extends Command
      */
     public function handle(): int
     {
-        $days = config('ped.alerts.missing_resource_days');
-        $quarterDays = config('ped.alerts.quarter_ending_days');
+        $days = (int) config('ped.alerts.missing_resource_days');
+        $quarterDays = (int) config('ped.alerts.quarter_ending_days');
         $raised = 0;
 
         Client::where('status', 'active')->with('quarters')->each(function (Client $client) use ($days, $quarterDays, &$raised) {
