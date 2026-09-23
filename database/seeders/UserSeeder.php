@@ -24,9 +24,9 @@ class UserSeeder extends Seeder
         }
 
         $users = [
-            ['Admin ContentU',   env('SEED_ADMIN_EMAIL', 'admin@contentu.local'), UserRole::Admin],
-            ['Account Manager',  'am@contentu.local',                             UserRole::AccountManager],
-            ['Copywriter',       'copy@contentu.local',                           UserRole::Copywriter],
+            ['Admin ContentU',   env('SEED_ADMIN_EMAIL', 'admin@example.com'), UserRole::Admin],
+            ['Account Manager',  'am@example.com',                             UserRole::AccountManager],
+            ['Copywriter',       'copy@example.com',                           UserRole::Copywriter],
         ];
 
         foreach ($users as [$name, $email, $role]) {

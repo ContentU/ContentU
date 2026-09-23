@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\ContentType;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+
+class ContentTypeController extends Controller
+{
+    public function index()
+    {
+        return Inertia::render('settings/content-types', [
+            'contentTypes' => ContentType::orderBy('sort_order')
+                ->get()
+                ->map(fn (ContentType $type) => [
+                    'id' => $type->id,
+                    'key' => $type->key,
+                    'label' => $type->label,
+                    'requiresSecondaryAsset' => $type->requires_secondary_asset,
+                    'isActive' => $type->is_active,
+                    'sortOrder' => $type->sort_order,
+                ]),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $this->validated($request);
+
+        $data['sort_order'] = (int) ContentType::max('sort_order') + 1;
+
+        ContentType::create($data);
+
+        Inertia::flash('message', 'Tipologia creata.');
+
+        return back();
+    }
+
+    public function update(Request $request, ContentType $contentType)
+    {
+        $data = $this->validated($request, $contentType->id);
+
+        $contentType->update($data);
+
+        Inertia::flash('message', 'Tipologia aggiornata.');
+
+        return back();
+    }
+
+    public function destroy(ContentType $contentType)
+    {
+        if ($contentType->contents()->exists()) {
+            return back()->withErrors([
+                'key' => 'Questa tipologia è usata da contenuti esistenti: puoi solo disattivarla.',
+            ]);
+        }
+
+        $contentType->delete();
+
+        Inertia::flash('message', 'Tipologia eliminata.');
+
+        return back();
+    }
+
+    private function validated(Request $request, ?int $id = null): array
+    {
+        return $request->validate([
+            'key' => ['required', 'alpha_dash', 'max:50', Rule::unique('content_types', 'key')->ignore($id)],
+            'label' => ['required', 'string', 'max:100'],
+            'requires_secondary_asset' => ['boolean'],
+            'is_active' => ['boolean'],
+        ]);
+    }
+}

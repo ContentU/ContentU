@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\QuarterStatus;
 use App\Models\Client;
+use App\Models\Content;
 use App\Models\Quarter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -85,6 +86,20 @@ class QuarterController extends Controller
             ],
             'allowedTransitions' => collect($quarter->status->allowedNext())
                 ->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()]),
+            'contents' => $quarter->contents()
+                ->with('contentType')
+                ->orderBy('publish_at')
+                ->get()
+                ->map(fn (Content $c) => [
+                    'id' => $c->id,
+                    'title' => $c->title,
+                    'contentTypeLabel' => $c->contentType->label,
+                    'publishAt' => $c->publish_at->format('d/m/Y H:i'),
+                    'status' => $c->status->value,
+                    'statusLabel' => $c->status->label(),
+                    'channels' => $c->channels ?? [],
+                    'isReady' => $c->isReadyToSchedule(),
+                ]),
         ]);
     }
 

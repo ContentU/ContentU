@@ -47,6 +47,11 @@ class Client extends Model
         return $this->hasMany(Quarter::class);   // Fase 04
     }
 
+    public function tags(): HasMany
+    {
+        return $this->hasMany(Tag::class);   // Fase 05
+    }
+
     public function initials(): string
     {
         $words = preg_split('/\s+/', trim($this->name));

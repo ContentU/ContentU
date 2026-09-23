@@ -30,6 +30,16 @@ class QuarterFactory extends Factory
         ];
     }
 
+    /** Trimestre preciso, con label e date coerenti. */
+    public function period(int $year, int $quarterNumber): static
+    {
+        return $this->state(fn () => [
+            'year' => $year,
+            'quarter_number' => $quarterNumber,
+            ...Quarter::deriveDates($year, $quarterNumber),
+        ]);
+    }
+
     public function inReview(): static
     {
         return $this->state(fn () => ['status' => 'in_review']);
@@ -38,5 +48,10 @@ class QuarterFactory extends Factory
     public function approved(): static
     {
         return $this->state(fn () => ['status' => 'approved']);
+    }
+
+    public function closed(): static
+    {
+        return $this->state(fn () => ['status' => 'closed']);
     }
 }

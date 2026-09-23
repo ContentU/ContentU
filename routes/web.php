@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\ContentTypeController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ContentController;
 use App\Http\Controllers\QuarterController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +19,19 @@ Route::middleware(['auth', 'role:admin,account_manager,copywriter'])->group(func
     Route::post('clients/{client}/quarters', [QuarterController::class, 'store'])->name('quarters.store');
     Route::get('quarters/{quarter}', [QuarterController::class, 'show'])->name('quarters.show');
     Route::patch('quarters/{quarter}/status', [QuarterController::class, 'updateStatus'])->name('quarters.status');
+
+    Route::get('quarters/{quarter}/contents/create', [ContentController::class, 'create'])->name('contents.create');
+    Route::post('quarters/{quarter}/contents', [ContentController::class, 'store'])->name('contents.store');
+    Route::get('contents/{content}/edit', [ContentController::class, 'edit'])->name('contents.edit');
+    Route::put('contents/{content}', [ContentController::class, 'update'])->name('contents.update');
+    Route::delete('contents/{content}', [ContentController::class, 'destroy'])->name('contents.destroy');
+    Route::patch('contents/{content}/status', [ContentController::class, 'updateStatus'])->name('contents.status');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('settings')->group(function () {
+    Route::resource('content-types', ContentTypeController::class)
+        ->except(['show', 'create', 'edit'])
+        ->names('settings.content-types');
 });
 
 require __DIR__.'/settings.php';
