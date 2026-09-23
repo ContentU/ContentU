@@ -6,7 +6,8 @@ export type DomainStatus =
     | 'approved'
     | 'scheduled'
     | 'published'
-    | 'needs_changes';
+    | 'needs_changes'
+    | 'closed';
 
 const LABELS: Record<DomainStatus, string> = {
     draft: 'Bozza',
@@ -15,6 +16,7 @@ const LABELS: Record<DomainStatus, string> = {
     scheduled: 'Programmato',
     published: 'Pubblicato',
     needs_changes: 'Richiesta modifica',
+    closed: 'Concluso',
 };
 
 // Solo utility derivate dai token di app.css — vedi regola DS4.
@@ -25,12 +27,19 @@ const STYLES: Record<DomainStatus, string> = {
     scheduled: 'bg-status-scheduled-bg text-status-scheduled',
     published: 'bg-status-published-bg text-status-published',
     needs_changes: 'bg-status-review-bg text-status-review',
+    closed: 'bg-status-published-bg text-status-published',
 };
 
-export function StatusBadge({ status }: { status: DomainStatus }) {
+export function StatusBadge({
+    status,
+    label,
+}: {
+    status: DomainStatus;
+    label?: string;
+}) {
     return (
         <Badge variant="outline" className={STYLES[status]}>
-            {LABELS[status]}
+            {label ?? LABELS[status]}
         </Badge>
     );
 }
