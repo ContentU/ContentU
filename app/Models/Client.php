@@ -57,6 +57,16 @@ class Client extends Model
         return $this->hasMany(ClientPublicLink::class);   // Fase 07
     }
 
+    public function shootingTargets(): HasMany
+    {
+        return $this->hasMany(ShootingTarget::class);   // Fase 12
+    }
+
+    public function shootingSessions(): HasMany
+    {
+        return $this->hasMany(ShootingSession::class);   // Fase 12
+    }
+
     public function initials(): string
     {
         $words = preg_split('/\s+/', trim($this->name));

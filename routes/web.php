@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicLinkController;
 use App\Http\Controllers\PublicPedController;
 use App\Http\Controllers\QuarterController;
+use App\Http\Controllers\ShootingController;
 use App\Http\Controllers\TopicPreviewController;
 use App\Http\Controllers\TopicPreviewItemController;
 use App\Http\Controllers\UserController;
@@ -55,6 +56,13 @@ Route::middleware(['auth', 'role:admin,account_manager,copywriter'])->group(func
     Route::post('topic-items/{item}/promote', [TopicPreviewItemController::class, 'promote'])->name('topic-items.promote');
 });
 
+Route::middleware(['auth', 'role:admin,account_manager'])->prefix('shooting')->group(function () {
+    Route::get('/', [ShootingController::class, 'index'])->name('shooting.index');
+    Route::post('targets', [ShootingController::class, 'storeTarget'])->name('shooting.targets.store');
+    Route::post('sessions', [ShootingController::class, 'storeSession'])->name('shooting.sessions.store');
+    Route::put('planning-rules', [ShootingController::class, 'updatePlanningRules'])->name('shooting.planning-rules.update');
+});
+
 Route::middleware(['auth', 'role:admin'])->prefix('settings')->group(function () {
     Route::resource('content-types', ContentTypeController::class)
         ->except(['show', 'create', 'edit'])
@@ -76,6 +84,7 @@ Route::middleware('public-link')->prefix('ped/{token}')->group(function () {
     Route::post('check-email', [PublicPedController::class, 'checkEmail'])->name('ped.check-email');
     Route::get('argomenti', [PublicPedController::class, 'topics'])->name('ped.topics');
     Route::get('feed', [PublicPedController::class, 'feed'])->name('ped.feed');
+    Route::get('shooting', [PublicPedController::class, 'shooting'])->name('ped.shooting');
 
     Route::middleware('auth')->group(function () {
         Route::post('contents/{content}/approve', [PublicPedController::class, 'approve'])->name('ped.approve');

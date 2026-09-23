@@ -72,10 +72,12 @@ it('SICUREZZA — nessuna prop Inertia pubblica contiene dati di altri clienti',
     $userA = User::factory()->client()->create();
     $userA->clients()->attach($a);
 
-    // Ispeziona il PAYLOAD serializzato, non solo il rendering visibile:
-    // un dato nascosto in UI ma presente nel JSON è comunque una fuga.
+    // Ispeziona il PAYLOAD serializzato (il markup HTML con le props Inertia
+    // incorporate), non solo il rendering visibile: un dato nascosto in UI
+    // ma presente nel JSON è comunque una fuga. Niente header X-Inertia-Version
+    // fittizio: farebbe rispondere 409 con corpo vuoto e il test passerebbe
+    // sempre, a vuoto, senza controllare nulla.
     $json = $this->actingAs($userA)
-        ->withHeaders(['X-Inertia' => 'true', 'X-Inertia-Version' => ''])
         ->get("/ped/{$linkA->token}/feed")
         ->getContent();
 

@@ -7,8 +7,11 @@ use App\Models\Alert;
 use App\Models\Client;
 use App\Models\Content;
 use App\Models\Quarter;
+use App\Models\User;
 use App\Notifications\AlertRaised;
+use App\Support\WorkloadCalculator;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -100,6 +103,29 @@ class CheckPedAlerts extends Command
                     }
                 });
         });
+
+        // 5 — Sovraccarico shooting (Fase 12, priorità S).
+        $max = config('ped.shooting.max_days_per_month');
+
+        foreach ([CarbonImmutable::now(), CarbonImmutable::now()->addMonth()] as $month) {
+            WorkloadCalculator::forMonth($month)
+                ->filter(fn ($row) => $row['days'] > $max)
+                ->each(function ($row) use ($month, &$raised, $max) {
+                    $user = User::find($row['userId']);
+
+                    // L'alert non è legato a un cliente specifico: si usa il primo cliente
+                    // attivo come ancoraggio, oppure si salta se non ce ne sono.
+                    $client = Client::where('status', 'active')->first();
+
+                    if ($client) {
+                        $raised += Alert::raise(
+                            $client, AlertType::ShootingOverload, $user,
+                            "{$user->name} ha {$row['days']} giornate di shooting a "
+                                .$month->translatedFormat('F Y').", oltre il tetto di {$max}.",
+                        ) ? 1 : 0;
+                    }
+                });
+        }
 
         // Chiude gli alert la cui condizione non è più vera.
         $this->resolveFixedAlerts();

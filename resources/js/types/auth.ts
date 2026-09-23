@@ -18,6 +18,7 @@ export type Auth = {
         manageUsers: boolean;
         approve: boolean;
         publish: boolean;
+        manageShooting: boolean;
     };
 };
 

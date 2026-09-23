@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\ClientPublicLink;
 use App\Models\Content;
 use App\Models\Quarter;
+use App\Models\ShootingSession;
 use App\Models\TopicPreview;
 use App\Models\User;
 use App\Notifications\ClientActionTaken;
@@ -148,6 +149,20 @@ class PublicPedController extends Controller
                 'canComment' => true,
                 'canEdit' => false, // decisione del capo, corretta due volte
             ],
+        ]);
+    }
+
+    public function shooting(Request $request, string $token)
+    {
+        $link = $this->link($request);
+
+        return Inertia::render('public-ped/shooting', [
+            'client' => $this->clientPayload($link->client),
+            'sessions' => ShootingSession::where('client_id', $link->client_id)
+                ->whereDate('session_date', '>=', today()->subMonths(1))
+                ->orderBy('session_date')
+                ->get()
+                ->map->toClientArray(),
         ]);
     }
 

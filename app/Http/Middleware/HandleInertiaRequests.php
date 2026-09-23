@@ -54,6 +54,7 @@ class HandleInertiaRequests extends Middleware
                     'manageUsers' => (bool) $user?->isAdmin(),
                     'approve' => (bool) ($user?->isAdmin() || $user?->isAccountManager()),
                     'publish' => (bool) ($user?->isAdmin() || $user?->isAccountManager()),
+                    'manageShooting' => (bool) ($user?->isAdmin() || $user?->isAccountManager()),
                 ],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
