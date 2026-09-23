@@ -23,7 +23,7 @@ class PedReadyForReview extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -32,5 +32,18 @@ class PedReadyForReview extends Notification implements ShouldQueue
             ->subject("Il tuo PED {$this->quarter->label} è pronto per la revisione")
             ->line("Il piano editoriale {$this->quarter->label} è pronto: puoi rivederlo, approvarlo o commentarlo.")
             ->action('Apri il PED', url("/ped/{$this->link->token}"));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toDatabase(object $notifiable): array
+    {
+        return [
+            'title' => 'PED pronto per la revisione',
+            'message' => "Il piano editoriale {$this->quarter->label} è pronto per la revisione.",
+            'url' => url("/ped/{$this->link->token}"),
+            'clientName' => $this->quarter->client->name,
+        ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -56,6 +57,19 @@ class HandleInertiaRequests extends Middleware
                 ],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'notifications' => $user === null ? null : Inertia::defer(fn () => [
+                'unreadCount' => $user->unreadNotifications()->count(),
+                'items' => $user->notifications()->latest()->limit(50)->get()
+                    ->map(fn ($n) => [
+                        'id' => $n->id,
+                        'title' => $n->data['title'] ?? '',
+                        'message' => $n->data['message'] ?? '',
+                        'url' => $n->data['url'] ?? null,
+                        'client' => $n->data['clientName'] ?? null,
+                        'readAt' => $n->read_at?->toIso8601String(),
+                        'at' => $n->created_at->diffForHumans(),
+                    ]),
+            ]),
         ];
     }
 }

@@ -23,7 +23,7 @@ class TopicPreviewResponded extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -44,5 +44,24 @@ class TopicPreviewResponded extends Notification implements ShouldQueue
         }
 
         return $mail;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toDatabase(object $notifiable): array
+    {
+        $labels = [
+            'approved' => 'approvato',
+            'approved_with_notes' => 'approvato con modifiche',
+            'revise' => 'da rivedere',
+        ];
+
+        return [
+            'title' => "Argomenti {$this->preview->month_label}",
+            'message' => "Il cliente ha segnato gli argomenti come «{$labels[$this->status]}».",
+            'url' => route('quarters.show', $this->preview->quarter_id),
+            'clientName' => $this->preview->quarter->client->name,
+        ];
     }
 }

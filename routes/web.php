@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ContentTypeController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicLinkController;
 use App\Http\Controllers\PublicPedController;
 use App\Http\Controllers\QuarterController;
@@ -15,6 +16,11 @@ Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::patch('notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::patch('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 });
 
 Route::middleware(['auth', 'role:admin,account_manager,copywriter'])->group(function () {
