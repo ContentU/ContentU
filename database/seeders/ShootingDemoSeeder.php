@@ -19,7 +19,7 @@ class ShootingDemoSeeder extends Seeder
     public function run(): void
     {
         if (! app()->environment('local', 'testing')) {
-            $this->command?->warn('ShootingDemoSeeder saltato: disponibile solo in local/testing.');
+            $this->command->warn('ShootingDemoSeeder saltato: disponibile solo in local/testing.');
 
             return;
         }
@@ -29,7 +29,7 @@ class ShootingDemoSeeder extends Seeder
             ->get();
 
         if ($crew->isEmpty()) {
-            $this->command?->warn('ShootingDemoSeeder saltato: nessun utente team disponibile.');
+            $this->command->warn('ShootingDemoSeeder saltato: nessun utente team disponibile.');
 
             return;
         }
@@ -61,6 +61,9 @@ class ShootingDemoSeeder extends Seeder
         ]);
     }
 
+    /**
+     * @param Collection<int, User> $crew
+     */
     private function seedSession(Client $client, Collection $crew): void
     {
         $session = ShootingSession::factory()->create([
@@ -79,10 +82,12 @@ class ShootingDemoSeeder extends Seeder
             $roles[] = fake()->randomElement(['photo', 'video']);
         }
 
-        $assignees->each(fn (User $user, int $i) => $session->assignments()->create([
-            'user_id' => $user->id,
-            'role' => $roles[$i],
-            'is_alternative' => $i === 2,
-        ]));
+        $assignees->each(function (User $user, int $i) {
+            $session->assignments()->create([
+                'user_id' => $user->id,
+                'role' => $roles[$i],
+                'is_alternative' => $i === 2,
+            ]);
+        });
     }
 }

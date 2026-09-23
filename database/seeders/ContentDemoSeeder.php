@@ -30,7 +30,7 @@ class ContentDemoSeeder extends Seeder
     public function run(): void
     {
         if (! app()->environment('local', 'testing')) {
-            $this->command?->warn('ContentDemoSeeder saltato: disponibile solo in local/testing.');
+            $this->command->warn('ContentDemoSeeder saltato: disponibile solo in local/testing.');
 
             return;
         }
@@ -38,7 +38,7 @@ class ContentDemoSeeder extends Seeder
         $contentTypes = ContentType::all();
 
         if ($contentTypes->isEmpty()) {
-            $this->command?->warn('ContentDemoSeeder saltato: esegui prima ContentTypeSeeder.');
+            $this->command->warn('ContentDemoSeeder saltato: esegui prima ContentTypeSeeder.');
 
             return;
         }
@@ -57,12 +57,17 @@ class ContentDemoSeeder extends Seeder
         });
     }
 
+    /**
+     * @param Collection<int, ContentType> $contentTypes
+     * @param Collection<int, Tag> $tags
+     */
     private function seedContents(Client $client, Quarter $quarter, Collection $contentTypes, Collection $tags): void
     {
         $teamMember = $client->teamMembers()->inRandomOrder()->first();
         $clientUser = $client->users()->where('role', 'client')->first();
 
         foreach (self::STATUSES as $status) {
+            /** @var ContentType $contentType */
             $contentType = $contentTypes->random();
             $hasResource = $status !== 'draft';
 
@@ -103,7 +108,11 @@ class ContentDemoSeeder extends Seeder
         }
     }
 
-    /** Bypassa la factory: fake()->unique() sui mesi si esaurirebbe dopo 12 trimestri. */
+    /**
+     * Bypassa la factory: fake()->unique() sui mesi si esaurirebbe dopo 12 trimestri.
+     *
+     * @param Collection<int, ContentType> $contentTypes
+     */
     private function seedTopicPreviews(Client $client, Quarter $quarter, Collection $contentTypes): void
     {
         $start = Carbon::parse($quarter->starts_on);
