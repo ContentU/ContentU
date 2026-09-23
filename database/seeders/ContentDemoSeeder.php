@@ -58,8 +58,8 @@ class ContentDemoSeeder extends Seeder
     }
 
     /**
-     * @param Collection<int, ContentType> $contentTypes
-     * @param Collection<int, Tag> $tags
+     * @param  Collection<int, ContentType>  $contentTypes
+     * @param  Collection<int, Tag>  $tags
      */
     private function seedContents(Client $client, Quarter $quarter, Collection $contentTypes, Collection $tags): void
     {
@@ -111,7 +111,7 @@ class ContentDemoSeeder extends Seeder
     /**
      * Bypassa la factory: fake()->unique() sui mesi si esaurirebbe dopo 12 trimestri.
      *
-     * @param Collection<int, ContentType> $contentTypes
+     * @param  Collection<int, ContentType>  $contentTypes
      */
     private function seedTopicPreviews(Client $client, Quarter $quarter, Collection $contentTypes): void
     {

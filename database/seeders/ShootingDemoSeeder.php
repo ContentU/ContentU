@@ -62,7 +62,7 @@ class ShootingDemoSeeder extends Seeder
     }
 
     /**
-     * @param Collection<int, User> $crew
+     * @param  Collection<int, User>  $crew
      */
     private function seedSession(Client $client, Collection $crew): void
     {
