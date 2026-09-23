@@ -81,11 +81,18 @@ export default function QuarterShow({
 
             <div className="mt-8 flex items-center justify-between">
                 <h2 className="font-serif text-xl">Contenuti</h2>
-                <Button asChild variant="outline">
-                    <Link href={`/quarters/${quarter.id}/contents/create`}>
-                        Nuovo contenuto
-                    </Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button asChild variant="outline">
+                        <Link href={`/quarters/${quarter.id}/feed`}>
+                            Vedi feed
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href={`/quarters/${quarter.id}/contents/create`}>
+                            Nuovo contenuto
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <div className="mt-4 space-y-2">

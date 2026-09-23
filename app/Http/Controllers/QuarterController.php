@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ContentStatus;
 use App\Enums\QuarterStatus;
 use App\Models\Client;
 use App\Models\Content;
@@ -100,6 +101,48 @@ class QuarterController extends Controller
                     'channels' => $c->channels ?? [],
                     'isReady' => $c->isReadyToSchedule(),
                 ]),
+        ]);
+    }
+
+    /**
+     * Feed del trimestre (griglia/elenco): un solo data layer, riusato anche
+     * dal portale pubblico del cliente (Fase 07) tramite gli stati ammessi.
+     */
+    public function feed(Request $request, Quarter $quarter)
+    {
+        $this->authorize('view', $quarter->client);
+
+        $statuses = $request->string('view')->toString() === 'published'
+            ? [ContentStatus::Published->value]
+            : array_map(fn ($s) => $s->value, ContentStatus::cases());
+
+        $contents = $quarter->contents()
+            ->with(['contentType:id,key,label', 'tags:id,label'])
+            ->whereIn('status', $statuses)
+            ->orderBy('publish_at')
+            ->get();
+
+        $user = $request->user();
+
+        return Inertia::render('quarters/feed', [
+            'client' => [
+                'id' => $quarter->client->id,
+                'name' => $quarter->client->name,
+            ],
+            'quarter' => [
+                'id' => $quarter->id,
+                'label' => $quarter->label,
+                'status' => $quarter->status->value,
+                'statusLabel' => $quarter->status->label(),
+            ],
+            'contents' => $contents->map(fn (Content $c) => $c->toFeedArray()),
+            'actions' => [
+                'canApprove' => $user->isAdmin() || $user->isAccountManager(),
+                'canReject' => $user->isAdmin() || $user->isAccountManager(),
+                'canComment' => true,
+                'canEdit' => true,
+            ],
+            'view' => $request->string('view')->toString() ?: 'all',
         ]);
     }
 

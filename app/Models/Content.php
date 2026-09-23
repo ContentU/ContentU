@@ -87,4 +87,35 @@ class Content extends Model
     {
         return $this->readiness()['blocking'] === [];
     }
+
+    /**
+     * Un solo data layer per il feed (griglia/elenco), usato sia dall'area
+     * interna (Fase 06) sia dal portale pubblico del cliente (Fase 07).
+     *
+     * @return array<string, mixed>
+     */
+    public function toFeedArray(): array
+    {
+        $this->loadMissing('contentType', 'tags');
+
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'caption' => $this->caption,
+            'hashtags' => $this->hashtags,
+            'resourceUrl' => $this->resource_url,
+            'coverResourceUrl' => $this->cover_resource_url,
+            'publishAt' => $this->publish_at->toIso8601String(),
+            'publishAtLabel' => $this->publish_at->locale('it')->translatedFormat('D j M'),
+            'status' => $this->status->value,
+            'typeLabel' => mb_strtoupper($this->contentType->label),
+            'typeKey' => $this->contentType->key,
+            'channels' => $this->channels ?? [],
+            'tags' => $this->tags->map(fn (Tag $tag) => [
+                'id' => $tag->id,
+                'label' => $tag->label,
+            ])->all(),
+            'isToday' => $this->publish_at->isToday(),
+        ];
+    }
 }

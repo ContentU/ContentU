@@ -19,6 +19,7 @@ Route::middleware(['auth', 'role:admin,account_manager,copywriter'])->group(func
     Route::post('clients/{client}/quarters', [QuarterController::class, 'store'])->name('quarters.store');
     Route::get('quarters/{quarter}', [QuarterController::class, 'show'])->name('quarters.show');
     Route::patch('quarters/{quarter}/status', [QuarterController::class, 'updateStatus'])->name('quarters.status');
+    Route::get('quarters/{quarter}/feed', [QuarterController::class, 'feed'])->name('quarters.feed');
 
     Route::get('quarters/{quarter}/contents/create', [ContentController::class, 'create'])->name('contents.create');
     Route::post('quarters/{quarter}/contents', [ContentController::class, 'store'])->name('contents.store');
