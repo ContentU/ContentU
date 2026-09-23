@@ -7,21 +7,31 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 
 export default defineConfig({
-    plugins: lazyPlugins(() => [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx'],
-            refresh: true,
-        }),
-        inertia(),
-        react(),
-        babel({
-            presets: [reactCompilerPreset()],
-        }),
-        tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
-    ]),
+    plugins: lazyPlugins(() => {
+        const plugins = [
+            laravel({
+                input: ['resources/css/app.css', 'resources/js/app.tsx'],
+                refresh: true,
+            }),
+            inertia(),
+            react(),
+            babel({
+                presets: [reactCompilerPreset()],
+            }),
+            tailwindcss(),
+        ];
+
+        // Disable wayfinder on environments without PHP 8.4+ support
+        if (!process.env.SKIP_WAYFINDER) {
+            plugins.push(
+                wayfinder({
+                    formVariants: true,
+                })
+            );
+        }
+
+        return plugins;
+    }),
     server: {
         watch: {
             ignored: [
