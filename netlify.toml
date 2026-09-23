@@ -1,5 +1,5 @@
 [build]
-command = "composer install --no-interaction --prefer-dist --ignore-platform-req=php && npm run build"
+command = "composer install --no-interaction --prefer-dist --ignore-platform-reqs && npm run build"
 publish = "dist"
 
 [build.environment]
