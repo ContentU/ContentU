@@ -4,19 +4,21 @@ use App\Http\Controllers\Admin\ContentTypeController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicLinkController;
 use App\Http\Controllers\PublicPedController;
 use App\Http\Controllers\QuarterController;
 use App\Http\Controllers\TopicPreviewController;
 use App\Http\Controllers\TopicPreviewItemController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
-});
+Route::get('dashboard', DashboardController::class)
+    ->middleware(['auth', 'verified', 'role:admin,account_manager,copywriter'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::patch('notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
@@ -57,6 +59,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('settings')->group(function ()
     Route::resource('content-types', ContentTypeController::class)
         ->except(['show', 'create', 'edit'])
         ->names('settings.content-types');
+
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::post('users', [UserController::class, 'store'])->name('users.store');
+    Route::patch('users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle');
 });
 
 Route::middleware(['auth', 'role:admin,account_manager'])->group(function () {

@@ -84,4 +84,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     {
         return $this->belongsToMany(Client::class)->withTimestamps();
     }
+
+    public function initials(): string
+    {
+        $words = preg_split('/\s+/', trim($this->name));
+
+        return strtoupper(mb_substr($words[0] ?? '', 0, 1).mb_substr($words[1] ?? '', 0, 1));
+    }
 }

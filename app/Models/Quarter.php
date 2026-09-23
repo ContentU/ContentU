@@ -66,4 +66,18 @@ class Quarter extends Model
     {
         return today()->betweenIncluded($this->starts_on, $this->ends_on);
     }
+
+    /** Percentuale di contenuti pronti (programmati o pubblicati) sul totale pianificato del trimestre. */
+    public function healthPercentage(): int
+    {
+        $total = $this->contents()->count();
+
+        if ($total === 0) {
+            return 0;
+        }
+
+        $ready = $this->contents()->whereIn('status', ['scheduled', 'published'])->count();
+
+        return (int) round($ready / $total * 100);
+    }
 }

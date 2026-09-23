@@ -32,7 +32,7 @@ it('blocca un utente disattivato sulle rotte protette da ruolo', function () {
     $user = User::factory()->admin()->inactive()->create();
 
     $this->actingAs($user)->get('/dashboard')->assertForbidden();
-})->skip('Attivare quando /dashboard userà il middleware role (Fase 11).');
+});
 
 it('nega la registrazione senza un link PED valido in sessione', function () {
     $this->post('/register', [
