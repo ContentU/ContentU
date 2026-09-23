@@ -6,6 +6,8 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\PublicLinkController;
 use App\Http\Controllers\PublicPedController;
 use App\Http\Controllers\QuarterController;
+use App\Http\Controllers\TopicPreviewController;
+use App\Http\Controllers\TopicPreviewItemController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -29,6 +31,18 @@ Route::middleware(['auth', 'role:admin,account_manager,copywriter'])->group(func
     Route::put('contents/{content}', [ContentController::class, 'update'])->name('contents.update');
     Route::delete('contents/{content}', [ContentController::class, 'destroy'])->name('contents.destroy');
     Route::patch('contents/{content}/status', [ContentController::class, 'updateStatus'])->name('contents.status');
+
+    Route::get('quarters/{quarter}/topics', [TopicPreviewController::class, 'index'])->name('topics.index');
+    Route::post('quarters/{quarter}/topics', [TopicPreviewController::class, 'store'])->name('topics.store');
+    Route::put('topics/{topicPreview}', [TopicPreviewController::class, 'update'])->name('topics.update');
+    Route::delete('topics/{topicPreview}', [TopicPreviewController::class, 'destroy'])->name('topics.destroy');
+
+    Route::post('topics/{topicPreview}/items', [TopicPreviewItemController::class, 'store'])->name('topic-items.store');
+    Route::put('topic-items/{item}', [TopicPreviewItemController::class, 'update'])->name('topic-items.update');
+    Route::delete('topic-items/{item}', [TopicPreviewItemController::class, 'destroy'])->name('topic-items.destroy');
+
+    // Trasforma un tema approvato in un contenuto reale.
+    Route::post('topic-items/{item}/promote', [TopicPreviewItemController::class, 'promote'])->name('topic-items.promote');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('settings')->group(function () {
@@ -45,12 +59,14 @@ Route::middleware(['auth', 'role:admin,account_manager'])->group(function () {
 Route::middleware('public-link')->prefix('ped/{token}')->group(function () {
     Route::get('/', [PublicPedController::class, 'entry'])->name('ped.entry');
     Route::post('check-email', [PublicPedController::class, 'checkEmail'])->name('ped.check-email');
+    Route::get('argomenti', [PublicPedController::class, 'topics'])->name('ped.topics');
     Route::get('feed', [PublicPedController::class, 'feed'])->name('ped.feed');
 
     Route::middleware('auth')->group(function () {
         Route::post('contents/{content}/approve', [PublicPedController::class, 'approve'])->name('ped.approve');
         Route::post('contents/{content}/reject', [PublicPedController::class, 'reject'])->name('ped.reject');
         Route::post('contents/{content}/comment', [PublicPedController::class, 'comment'])->name('ped.comment');
+        Route::post('topics/{topicPreview}/respond', [PublicPedController::class, 'respondToTopics'])->name('ped.topics.respond');
     });
 });
 

@@ -6,8 +6,12 @@ use App\Enums\ContentStatus;
 use App\Models\Client;
 use App\Models\ClientPublicLink;
 use App\Models\Content;
+use App\Models\Quarter;
+use App\Models\TopicPreview;
 use App\Models\User;
 use App\Notifications\ClientActionTaken;
+use App\Notifications\TopicPreviewResponded;
+use App\Support\TopicSynthesis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -56,12 +60,75 @@ class PublicPedController extends Controller
         ]);
     }
 
-    public function feed(Request $request, string $token)
+    public function topics(Request $request, string $token)
+    {
+        $link = $this->link($request);
+        $quarter = $this->currentQuarter($link->client);
+
+        $months = $quarter
+            ? $quarter->topicPreviews()->with('items')->orderBy('month_order')->get()
+            : collect();
+
+        return Inertia::render('public-ped/topic-preview', [
+            'client' => $this->clientPayload($link->client),
+            'quarter' => $quarter ? ['label' => $quarter->label] : null,
+            'months' => $months->map(fn (TopicPreview $preview) => [
+                'id' => $preview->id,
+                'label' => $preview->month_label,
+                'count' => $preview->items->count(),
+                'status' => $preview->status,
+                'statusLabel' => $preview->statusLabel(),
+                'note' => $preview->note,
+                'approvalStatus' => $preview->latestApproval?->status,
+                'items' => $preview->items->values()->map(fn ($item, $index) => [
+                    'index' => $index + 1,
+                    'formatLabel' => $item->format_label,
+                    'periodLabel' => $item->period_label,
+                    'title' => $item->title,
+                    'theme' => $item->theme,
+                    'objective' => $item->objective,
+                    'footnote' => $item->footnote,
+                ]),
+            ]),
+            'synthesis' => $quarter ? [
+                'recurringThemes' => TopicSynthesis::recurringThemes($quarter),
+                'materialToProduce' => TopicSynthesis::materialToProduce($quarter),
+            ] : null,
+        ]);
+    }
+
+    public function respondToTopics(Request $request, string $token, TopicPreview $topicPreview)
     {
         $link = $this->link($request);
 
-        $quarter = $link->client->quarters()->current()->first()
-            ?? $link->client->quarters()->orderByDesc('year')->orderByDesc('quarter_number')->first();
+        abort_unless($topicPreview->quarter->client_id === $link->client_id, 404);
+        abort_unless($request->user()->isClient(), 403);
+
+        $data = $request->validate([
+            'status' => ['required', 'in:approved,approved_with_notes,revise'],
+            'comment' => ['nullable', 'string', 'max:5000', 'required_unless:status,approved'],
+        ]);
+
+        $topicPreview->approvals()->create([
+            ...$data,
+            'responded_by' => $request->user()->id,
+            'responded_at' => now(),
+        ]);
+
+        Notification::send(
+            $topicPreview->quarter->client->teamMembers,
+            new TopicPreviewResponded($topicPreview, $data['status'], $data['comment'] ?? null),
+        );
+
+        Inertia::flash('message', 'Risposta inviata al team.');
+
+        return back();
+    }
+
+    public function feed(Request $request, string $token)
+    {
+        $link = $this->link($request);
+        $quarter = $this->currentQuarter($link->client);
 
         $contents = $quarter
             ? $quarter->contents()
@@ -141,6 +208,13 @@ class PublicPedController extends Controller
     private function link(Request $request): ClientPublicLink
     {
         return $request->attributes->get('publicLink');
+    }
+
+    /** Un solo posto per scegliere QUALE trimestre mostrare al cliente: il corrente, o il più recente. */
+    private function currentQuarter(Client $client): ?Quarter
+    {
+        return $client->quarters()->current()->first()
+            ?? $client->quarters()->orderByDesc('year')->orderByDesc('quarter_number')->first();
     }
 
     /** Solo i campi pubblici del cliente: mai note interne, tone of voice, dati di altri clienti. */
