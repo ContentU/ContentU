@@ -143,6 +143,7 @@ export default function QuarterFeed({
                 <ContentDetailPanel
                     content={selected}
                     actions={actions}
+                    onSendToReview={() => updateStatus('in_review')}
                     onApprove={() => updateStatus('approved')}
                     onReject={() => updateStatus('needs_changes')}
                     onResumeToDraft={() => updateStatus('draft')}

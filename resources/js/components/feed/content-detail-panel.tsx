@@ -1,16 +1,21 @@
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import { CommentThread } from '@/components/comments/comment-thread';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import type { FeedContent, FeedViewerActions } from '@/types/content';
 
 type Props = {
     content: FeedContent | null;
     actions: FeedViewerActions;
     onApprove?: () => void;
-    onReject?: () => void;
+    onReject?: (comment?: string) => void;
+    /** Il portale cliente richiede sempre un motivo esplicito (§3.7): mostra un form inline invece di rifiutare subito. */
+    rejectRequiresComment?: boolean;
     onSubmitComment?: (body: string) => void;
     onResumeToDraft?: () => void;
+    onSendToReview?: () => void;
 };
 
 export function ContentDetailPanel({
@@ -18,9 +23,14 @@ export function ContentDetailPanel({
     actions,
     onApprove,
     onReject,
+    rejectRequiresComment = false,
     onSubmitComment,
     onResumeToDraft,
+    onSendToReview,
 }: Props) {
+    const [rejecting, setRejecting] = useState(false);
+    const [rejectComment, setRejectComment] = useState('');
+
     if (!content) {
         return (
             <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
@@ -28,6 +38,23 @@ export function ContentDetailPanel({
             </div>
         );
     }
+
+    const startReject = () => {
+        if (rejectRequiresComment) {
+            setRejecting(true);
+            return;
+        }
+
+        onReject?.();
+    };
+
+    const confirmReject = () => {
+        if (!rejectComment.trim()) return;
+
+        onReject?.(rejectComment.trim());
+        setRejecting(false);
+        setRejectComment('');
+    };
 
     const lastClientComment = [...content.comments]
         .reverse()
@@ -85,11 +112,16 @@ export function ContentDetailPanel({
             )}
 
             <div className="flex flex-wrap gap-2">
-                {actions.canApprove && (
+                {actions.canEdit && content.status === 'draft' && (
+                    <Button onClick={onSendToReview}>
+                        Porta in revisione
+                    </Button>
+                )}
+                {actions.canApprove && content.status === 'in_review' && (
                     <Button onClick={onApprove}>✓ Approva</Button>
                 )}
-                {actions.canReject && (
-                    <Button variant="outline" onClick={onReject}>
+                {actions.canReject && !rejecting && (
+                    <Button variant="outline" onClick={startReject}>
                         ✕ Rifiuta
                     </Button>
                 )}
@@ -106,6 +138,28 @@ export function ContentDetailPanel({
                     </Button>
                 )}
             </div>
+
+            {rejecting && (
+                <div className="space-y-2">
+                    <Textarea
+                        placeholder="Perché rifiuti questo contenuto? Il commento aiuta il team a capire cosa cambiare."
+                        value={rejectComment}
+                        onChange={(e) => setRejectComment(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                        <Button onClick={confirmReject}>Invia rifiuto</Button>
+                        <Button
+                            variant="ghost"
+                            onClick={() => {
+                                setRejecting(false);
+                                setRejectComment('');
+                            }}
+                        >
+                            Annulla
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {actions.canComment && (
                 <CommentThread

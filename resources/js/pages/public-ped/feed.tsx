@@ -36,16 +36,10 @@ export default function PublicPedFeed({
         router.post(`/ped/${token}/contents/${selected.id}/approve`);
     };
 
-    // Il rifiuto richiede sempre un motivo esplicito (§3.7): un prompt
-    // rapido va bene finché non arriva un layout dedicato dal capo.
-    const reject = () => {
-        if (!selected) return;
-
-        const comment = window.prompt(
-            'Perché rifiuti questo contenuto? Il commento aiuta il team a capire cosa cambiare.',
-        );
-
-        if (!comment) return;
+    // Il rifiuto richiede sempre un motivo esplicito (§3.7): form inline,
+    // gestito da ContentDetailPanel via rejectRequiresComment.
+    const reject = (comment?: string) => {
+        if (!selected || !comment) return;
 
         router.post(`/ped/${token}/contents/${selected.id}/reject`, {
             comment,
@@ -105,6 +99,7 @@ export default function PublicPedFeed({
                     actions={actions}
                     onApprove={approve}
                     onReject={reject}
+                    rejectRequiresComment
                     onSubmitComment={submitComment}
                 />
             </div>
