@@ -41,7 +41,7 @@ function PublicLinkPanel({
 
     const copy = () => {
         if (!publicLink) return;
-        navigator.clipboard.writeText(publicLink.url);
+        void navigator.clipboard.writeText(publicLink.url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };

@@ -81,18 +81,6 @@ type Props = {
     planningRules: string | null;
 };
 
-const TYPE_LABELS: Record<ShootingType, string> = {
-    photo: 'Foto',
-    video: 'Video',
-    photo_video: 'Foto + Video',
-};
-
-const ROLE_LABELS: Record<Role, string> = {
-    photo: 'Foto',
-    video: 'Video',
-    coordination: 'Coordinamento',
-};
-
 export default function ShootingIndex({
     targets,
     sessions,
