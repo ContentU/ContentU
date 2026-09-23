@@ -35,11 +35,11 @@ export function ContentGridView({ contents, selectedId, onSelect }: Props) {
                             {content.typeLabel}
                         </div>
                     )}
-                    <span className="absolute left-1 top-1 rounded-sm bg-background/85 px-1 font-mono text-[10px] uppercase tracking-wide">
+                    <span className="absolute top-1 left-1 rounded-sm bg-background/85 px-1 font-mono text-[10px] tracking-wide uppercase">
                         {content.typeLabel}
                     </span>
                     {content.isToday && (
-                        <span className="absolute bottom-1 left-1 rounded-sm bg-primary px-1 font-mono text-[10px] uppercase text-primary-foreground">
+                        <span className="absolute bottom-1 left-1 rounded-sm bg-primary px-1 font-mono text-[10px] text-primary-foreground uppercase">
                             oggi
                         </span>
                     )}

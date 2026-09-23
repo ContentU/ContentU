@@ -93,7 +93,11 @@ function ItemForm({ topicId }: { topicId: number }) {
                 value={data.footnote}
                 onChange={(e) => setData('footnote', e.target.value)}
             />
-            <Button type="submit" disabled={processing} className="sm:col-span-2">
+            <Button
+                type="submit"
+                disabled={processing}
+                className="sm:col-span-2"
+            >
                 Aggiungi argomento
             </Button>
         </form>
@@ -143,7 +147,7 @@ function MonthBlock({ month }: { month: Month }) {
                     >
                         <div className="flex items-start justify-between gap-2">
                             <div>
-                                <p className="font-mono text-xs uppercase text-muted-foreground">
+                                <p className="font-mono text-xs text-muted-foreground uppercase">
                                     {String(i + 1).padStart(2, '0')} ·{' '}
                                     {item.formatLabel} · {item.periodLabel}
                                 </p>

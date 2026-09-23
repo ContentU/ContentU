@@ -114,8 +114,7 @@ export default function PublicShooting({ client, sessions }: Props) {
 
             <p className="mx-auto mt-10 max-w-prose text-center text-sm text-muted-foreground">
                 Le date possono spostarsi in base alla disponibilità: ogni
-                variazione viene concordata con il team prima della
-                sessione.
+                variazione viene concordata con il team prima della sessione.
             </p>
         </div>
     );

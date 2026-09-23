@@ -86,9 +86,7 @@ function ApprovalPanel({ month, token }: { month: Month; token: string }) {
                 onChange={(e) => setComment(e.target.value)}
             />
             <div className="flex flex-wrap gap-2">
-                <Button onClick={() => respond('approved')}>
-                    ✓ Approvato
-                </Button>
+                <Button onClick={() => respond('approved')}>✓ Approvato</Button>
                 <Button
                     variant="outline"
                     onClick={() => respond('approved_with_notes')}
@@ -146,8 +144,8 @@ export default function PublicPedTopicPreview({
                     </p>
                 )}
                 <p className="mx-auto max-w-prose text-sm text-muted-foreground">
-                    Ecco una panoramica degli argomenti che vogliamo trattare
-                    in questo trimestre: una validazione di massima, prima di
+                    Ecco una panoramica degli argomenti che vogliamo trattare in
+                    questo trimestre: una validazione di massima, prima di
                     entrare nel dettaglio dei singoli contenuti.
                 </p>
             </header>
@@ -197,14 +195,11 @@ export default function PublicPedTopicPreview({
                                     key={item.index}
                                     className="space-y-2 p-4"
                                 >
-                                    <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-                                        {String(item.index).padStart(2, '0')}{' '}
-                                        · {item.formatLabel} ·{' '}
-                                        {item.periodLabel}
+                                    <p className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
+                                        {String(item.index).padStart(2, '0')} ·{' '}
+                                        {item.formatLabel} · {item.periodLabel}
                                     </p>
-                                    <p className="font-medium">
-                                        {item.title}
-                                    </p>
+                                    <p className="font-medium">{item.title}</p>
                                     <p className="text-sm text-brand-rose">
                                         {item.theme}
                                     </p>
@@ -226,8 +221,7 @@ export default function PublicPedTopicPreview({
 
                 {months.length === 0 && (
                     <p className="text-center text-sm text-muted-foreground">
-                        Nessun argomento ancora proposto per questo
-                        trimestre.
+                        Nessun argomento ancora proposto per questo trimestre.
                     </p>
                 )}
             </div>
@@ -250,8 +244,7 @@ export default function PublicPedTopicPreview({
 
                     <p className="text-sm text-muted-foreground">
                         I temi sopra ricorrono più volte nel trimestre: sono i
-                        filoni portanti attorno a cui ruota il piano
-                        editoriale.
+                        filoni portanti attorno a cui ruota il piano editoriale.
                     </p>
 
                     <Card className="space-y-2 p-4">
@@ -275,9 +268,9 @@ export default function PublicPedTopicPreview({
                         <h3 className="font-medium">Cosa ci serve da voi</h3>
                         <p className="text-sm text-muted-foreground">
                             Una validazione di massima su questi temi: se
-                            qualcosa non convince, segnalacelo nel commento
-                            di ogni mese. Il materiale elencato sopra va
-                            girato con il vostro team quando indicato.
+                            qualcosa non convince, segnalacelo nel commento di
+                            ogni mese. Il materiale elencato sopra va girato con
+                            il vostro team quando indicato.
                         </p>
                     </Card>
                 </section>

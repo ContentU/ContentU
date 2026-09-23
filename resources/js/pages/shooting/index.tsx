@@ -212,7 +212,9 @@ function TargetsBlock({
 
     return (
         <section className="space-y-3">
-            <h2 className="font-medium">Scheda clienti: target vs pianificato</h2>
+            <h2 className="font-medium">
+                Scheda clienti: target vs pianificato
+            </h2>
 
             <Card className="divide-y divide-border">
                 {targets.map((t) => (
@@ -250,10 +252,7 @@ function TargetsBlock({
                 )}
             </Card>
 
-            <form
-                onSubmit={submit}
-                className="flex flex-wrap items-end gap-3"
-            >
+            <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
                 <div className="grid gap-2">
                     <Label htmlFor="target_client">Cliente</Label>
                     <Select
@@ -315,10 +314,7 @@ function TargetsBlock({
                         className="w-20"
                         value={data.planned_sessions}
                         onChange={(e) =>
-                            setData(
-                                'planned_sessions',
-                                Number(e.target.value),
-                            )
+                            setData('planned_sessions', Number(e.target.value))
                         }
                     />
                 </div>
@@ -446,9 +442,7 @@ function SessionsBlock({
                             className="space-y-4"
                         >
                             <div className="grid gap-2">
-                                <Label htmlFor="session_client">
-                                    Cliente
-                                </Label>
+                                <Label htmlFor="session_client">Cliente</Label>
                                 <Select
                                     value={data.client_id}
                                     onValueChange={(v) =>
@@ -483,10 +477,7 @@ function SessionsBlock({
                                     type="date"
                                     value={data.session_date}
                                     onChange={(e) =>
-                                        setData(
-                                            'session_date',
-                                            e.target.value,
-                                        )
+                                        setData('session_date', e.target.value)
                                     }
                                 />
                                 {errors.session_date && (
@@ -535,10 +526,7 @@ function SessionsBlock({
                                 <Checkbox
                                     checked={data.checkpoint_required}
                                     onCheckedChange={(v) =>
-                                        setData(
-                                            'checkpoint_required',
-                                            !!v,
-                                        )
+                                        setData('checkpoint_required', !!v)
                                     }
                                 />
                                 Richiede checkpoint prima di calendarizzare
@@ -610,11 +598,7 @@ function SessionsBlock({
                                         <Select
                                             value={a.role}
                                             onValueChange={(v) =>
-                                                updateAssignment(
-                                                    i,
-                                                    'role',
-                                                    v,
-                                                )
+                                                updateAssignment(i, 'role', v)
                                             }
                                         >
                                             <SelectTrigger className="w-36">
@@ -649,9 +633,7 @@ function SessionsBlock({
                                             type="button"
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() =>
-                                                removeAssignment(i)
-                                            }
+                                            onClick={() => removeAssignment(i)}
                                         >
                                             Rimuovi
                                         </Button>
@@ -678,8 +660,7 @@ function SessionsBlock({
                     <div key={s.id} className="space-y-2 p-4">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             <p className="font-medium">
-                                {s.dateLabel} · {s.clientName} ·{' '}
-                                {s.typeLabel}
+                                {s.dateLabel} · {s.clientName} · {s.typeLabel}
                             </p>
                             {s.checkpointRequired && (
                                 <Badge
@@ -710,13 +691,11 @@ function SessionsBlock({
 
                                         return (
                                             <span key={i}>
-                                                {a.roleInitial}:{' '}
-                                                {a.userName}
+                                                {a.roleInitial}: {a.userName}
                                                 {alt && (
                                                     <span className="text-muted-foreground">
                                                         {' '}
-                                                        · (alt.{' '}
-                                                        {alt.userName})
+                                                        · (alt. {alt.userName})
                                                     </span>
                                                 )}
                                             </span>
@@ -750,10 +729,7 @@ function WorkloadBlock({ workload }: { workload: WorkloadRow[] }) {
 
             <Card className="divide-y divide-border">
                 {workload.map((w) => (
-                    <div
-                        key={w.userId}
-                        className="flex items-center gap-4 p-4"
-                    >
+                    <div key={w.userId} className="flex items-center gap-4 p-4">
                         <p className="w-40 shrink-0 truncate">{w.name}</p>
                         <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                             <div

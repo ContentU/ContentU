@@ -95,7 +95,11 @@ export default function Dashboard({
                 {FILTERS.map((f) => (
                     <Link
                         key={f.value}
-                        href={f.value ? `/dashboard?status=${f.value}` : '/dashboard'}
+                        href={
+                            f.value
+                                ? `/dashboard?status=${f.value}`
+                                : '/dashboard'
+                        }
                         preserveScroll
                         className={
                             filters.status === f.value

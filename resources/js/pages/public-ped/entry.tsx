@@ -57,7 +57,10 @@ function EmailStep({ client, token }: { client: PublicClient; token: string }) {
     return (
         <>
             <ClientHeader client={client} />
-            <form onSubmit={submit} className="mx-auto grid w-full max-w-sm gap-4">
+            <form
+                onSubmit={submit}
+                className="mx-auto grid w-full max-w-sm gap-4"
+            >
                 <div className="grid gap-2">
                     <Label htmlFor="email">Il tuo indirizzo email</Label>
                     <Input
@@ -79,13 +82,7 @@ function EmailStep({ client, token }: { client: PublicClient; token: string }) {
     );
 }
 
-function LoginStep({
-    client,
-    email,
-}: {
-    client: PublicClient;
-    email: string;
-}) {
+function LoginStep({ client, email }: { client: PublicClient; email: string }) {
     const { data, setData, post, processing, errors } = useForm({
         email,
         password: '',
@@ -100,7 +97,10 @@ function LoginStep({
     return (
         <>
             <ClientHeader client={client} />
-            <form onSubmit={submit} className="mx-auto grid w-full max-w-sm gap-4">
+            <form
+                onSubmit={submit}
+                className="mx-auto grid w-full max-w-sm gap-4"
+            >
                 <p className="text-center text-sm text-muted-foreground">
                     Bentornato/a, {email}
                 </p>
@@ -148,7 +148,10 @@ function RegisterStep({
     return (
         <>
             <ClientHeader client={client} />
-            <form onSubmit={submit} className="mx-auto grid w-full max-w-sm gap-4">
+            <form
+                onSubmit={submit}
+                className="mx-auto grid w-full max-w-sm gap-4"
+            >
                 <p className="text-center text-sm text-muted-foreground">
                     Prima volta qui, {email}? Crea il tuo accesso.
                 </p>

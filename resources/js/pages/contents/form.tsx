@@ -154,9 +154,7 @@ export function ContentForm({
                         id="publish_at"
                         type="datetime-local"
                         value={data.publish_at}
-                        onChange={(e) =>
-                            setData('publish_at', e.target.value)
-                        }
+                        onChange={(e) => setData('publish_at', e.target.value)}
                         required
                     />
                     {errors.publish_at && (
@@ -276,14 +274,9 @@ export function ContentForm({
 
             {readiness && (
                 <div className="space-y-1 rounded-lg border border-border p-4">
-                    <h2 className="font-medium">
-                        Checklist pre-pubblicazione
-                    </h2>
+                    <h2 className="font-medium">Checklist pre-pubblicazione</h2>
                     {readiness.blocking.map((message) => (
-                        <p
-                            key={message}
-                            className="text-sm text-destructive"
-                        >
+                        <p key={message} className="text-sm text-destructive">
                             {message}
                         </p>
                     ))}

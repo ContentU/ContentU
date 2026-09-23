@@ -9,7 +9,11 @@ import {
 } from '@/pages/contents/form';
 
 type Props = {
-    quarter: { id: number; label: string; client: { id: number; name: string } };
+    quarter: {
+        id: number;
+        label: string;
+        client: { id: number; name: string };
+    };
     content: EditableContent;
     contentTypes: ContentType[];
     tags: ContentTag[];

@@ -32,7 +32,10 @@ export default function ContentTypesSettings({ contentTypes }: Props) {
         post('/settings/content-types', { onSuccess: () => reset() });
     };
 
-    const toggle = (type: ContentType, field: 'requires_secondary_asset' | 'is_active') => {
+    const toggle = (
+        type: ContentType,
+        field: 'requires_secondary_asset' | 'is_active',
+    ) => {
         router.put(`/settings/content-types/${type.id}`, {
             key: type.key,
             label: type.label,

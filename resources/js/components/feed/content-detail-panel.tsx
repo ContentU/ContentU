@@ -72,7 +72,7 @@ export function ContentDetailPanel({
                 )}
             </div>
 
-            <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+            <p className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
                 {content.typeLabel}
             </p>
 
@@ -113,9 +113,7 @@ export function ContentDetailPanel({
 
             <div className="flex flex-wrap gap-2">
                 {actions.canEdit && content.status === 'draft' && (
-                    <Button onClick={onSendToReview}>
-                        Porta in revisione
-                    </Button>
+                    <Button onClick={onSendToReview}>Porta in revisione</Button>
                 )}
                 {actions.canApprove && content.status === 'in_review' && (
                     <Button onClick={onApprove}>✓ Approva</Button>

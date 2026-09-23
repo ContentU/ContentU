@@ -52,7 +52,7 @@ function PublicLinkPanel({
 
             {publicLink ? (
                 <>
-                    <p className="break-all text-sm text-muted-foreground">
+                    <p className="text-sm break-all text-muted-foreground">
                         {publicLink.url}
                     </p>
                     <p className="text-xs text-muted-foreground">
