@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Content extends Model
 {
@@ -41,6 +42,11 @@ class Content extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 
     /**
@@ -86,6 +92,26 @@ class Content extends Model
     public function isReadyToSchedule(): bool
     {
         return $this->readiness()['blocking'] === [];
+    }
+
+    /**
+     * Un solo posto dove un commento viene registrato e, se viene dal
+     * cliente, sblocca il contenuto per il rework (§3.7 S, inclusa in v1).
+     * Un commento del team non cambia mai lo stato.
+     */
+    public function recordComment(User $author, string $body): Comment
+    {
+        $comment = $this->comments()->create([
+            'author_id' => $author->id,
+            'author_role' => $author->isClient() ? 'client' : 'team',
+            'body' => $body,
+        ]);
+
+        if ($author->isClient() && $this->status->canTransitionTo(ContentStatus::NeedsChanges)) {
+            $this->update(['status' => ContentStatus::NeedsChanges->value]);
+        }
+
+        return $comment;
     }
 
     /**

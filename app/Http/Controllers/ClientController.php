@@ -90,7 +90,23 @@ class ClientController extends Controller
                 'userIds' => $client->users()->pluck('users.id'),
             ],
             'assignableUsers' => $this->assignableUsers(),
+            'publicLink' => $this->publicLinkPayload($client),
         ]);
+    }
+
+    private function publicLinkPayload(Client $client): ?array
+    {
+        $link = $client->publicLinks()->whereNull('revoked_at')->latest()->first();
+
+        if (! $link) {
+            return null;
+        }
+
+        return [
+            'id' => $link->id,
+            'url' => url("/ped/{$link->token}"),
+            'createdAt' => $link->created_at->format('d/m/Y H:i'),
+        ];
     }
 
     public function update(Request $request, Client $client)

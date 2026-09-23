@@ -101,22 +101,20 @@ class ContentController extends Controller
 
     public function updateStatus(Request $request, Content $content)
     {
-        $this->authorize('update', $content->quarter->client);
-
         $target = ContentStatus::from($request->validate([
             'status' => ['required', Rule::enum(ContentStatus::class)],
         ])['status']);
+
+        if (in_array($target, [ContentStatus::Approved, ContentStatus::Scheduled, ContentStatus::Published], true)) {
+            $this->authorize('approve', $content);
+        } else {
+            $this->authorize('update', $content);
+        }
 
         if (! $content->status->canTransitionTo($target)) {
             return back()->withErrors([
                 'status' => "Non si può passare da «{$content->status->label()}» a «{$target->label()}».",
             ]);
-        }
-
-        // Un copywriter non pubblica né approva (§02 del PED).
-        if (! $request->user()->isAdmin() && ! $request->user()->isAccountManager()
-            && in_array($target, [ContentStatus::Approved, ContentStatus::Scheduled, ContentStatus::Published], true)) {
-            abort(403, 'Il tuo ruolo non può approvare o pubblicare contenuti.');
         }
 
         // Checklist pre-pubblicazione (§3.2 S, inclusa in v1).

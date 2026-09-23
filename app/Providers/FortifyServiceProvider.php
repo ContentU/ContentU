@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Http\Responses\ClientAwareAuthResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -12,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LoginResponse;
+use Laravel\Fortify\Contracts\RegisterResponse;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
@@ -101,28 +103,13 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Redirect post-login per ruolo: un cliente esterno non entra mai nell'area interna.
+     * Redirect post-login/registrazione per ruolo: un cliente esterno non
+     * entra mai nell'area interna, ma atterra sul SUO portale pubblico
+     * se ha appena aperto un link PED valido (Fase 07).
      */
     private function configureLoginRedirect(): void
     {
-        $this->app->instance(LoginResponse::class, new class implements LoginResponse
-        {
-            public function toResponse($request)
-            {
-                $user = $request->user();
-
-                if ($user->isClient()) {
-                    auth()->logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-
-                    return redirect()->route('login')->withErrors([
-                        'email' => "Quest'area è riservata al team. Accedi dal link del tuo PED.",
-                    ]);
-                }
-
-                return redirect()->intended(route('dashboard'));
-            }
-        });
+        $this->app->instance(LoginResponse::class, new ClientAwareAuthResponse);
+        $this->app->instance(RegisterResponse::class, new ClientAwareAuthResponse);
     }
 }

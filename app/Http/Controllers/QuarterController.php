@@ -7,8 +7,10 @@ use App\Enums\QuarterStatus;
 use App\Models\Client;
 use App\Models\Content;
 use App\Models\Quarter;
+use App\Notifications\PedReadyForReview;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -168,9 +170,13 @@ class QuarterController extends Controller
         $quarter->update(['status' => $target->value]);
 
         // Notifica al cliente quando il PED entra in revisione (§3.5 S, inclusa in v1).
-        // Il meccanismo di invio arriva nella Fase 07: qui lasciamo l'aggancio.
         if ($wasDraft && $target === QuarterStatus::InReview) {
-            // TODO Fase 07: notificare gli utenti-cliente con il link pubblico.
+            $link = $quarter->client->publicLinks()->whereNull('revoked_at')->latest()->first();
+
+            if ($link) {
+                $clientUsers = $quarter->client->users()->where('role', 'client')->get();
+                Notification::send($clientUsers, new PedReadyForReview($quarter, $link));
+            }
         }
 
         Inertia::flash('message', 'Stato del trimestre aggiornato.');

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\ContentTypeController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContentController;
+use App\Http\Controllers\PublicLinkController;
+use App\Http\Controllers\PublicPedController;
 use App\Http\Controllers\QuarterController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('settings')->group(function ()
     Route::resource('content-types', ContentTypeController::class)
         ->except(['show', 'create', 'edit'])
         ->names('settings.content-types');
+});
+
+Route::middleware(['auth', 'role:admin,account_manager'])->group(function () {
+    Route::post('clients/{client}/public-link', [PublicLinkController::class, 'store'])->name('public-link.store');
+    Route::delete('public-links/{link}', [PublicLinkController::class, 'destroy'])->name('public-link.destroy');
+});
+
+Route::middleware('public-link')->prefix('ped/{token}')->group(function () {
+    Route::get('/', [PublicPedController::class, 'entry'])->name('ped.entry');
+    Route::post('check-email', [PublicPedController::class, 'checkEmail'])->name('ped.check-email');
+    Route::get('feed', [PublicPedController::class, 'feed'])->name('ped.feed');
+
+    Route::middleware('auth')->group(function () {
+        Route::post('contents/{content}/approve', [PublicPedController::class, 'approve'])->name('ped.approve');
+        Route::post('contents/{content}/reject', [PublicPedController::class, 'reject'])->name('ped.reject');
+        Route::post('contents/{content}/comment', [PublicPedController::class, 'comment'])->name('ped.comment');
+    });
 });
 
 require __DIR__.'/settings.php';

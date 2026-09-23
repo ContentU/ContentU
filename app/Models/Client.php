@@ -52,6 +52,11 @@ class Client extends Model
         return $this->hasMany(Tag::class);   // Fase 05
     }
 
+    public function publicLinks(): HasMany
+    {
+        return $this->hasMany(ClientPublicLink::class);   // Fase 07
+    }
+
     public function initials(): string
     {
         $words = preg_split('/\s+/', trim($this->name));
