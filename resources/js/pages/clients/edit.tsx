@@ -51,9 +51,14 @@ function PublicLinkPanel({
 
             {publicLink ? (
                 <>
-                    <p className="text-sm break-all text-muted-foreground">
+                    <a
+                        href={publicLink.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm break-all text-primary underline underline-offset-2 hover:text-primary/80"
+                    >
                         {publicLink.url}
-                    </p>
+                    </a>
                     <p className="text-xs text-muted-foreground">
                         Generato il {publicLink.createdAt}
                     </p>
