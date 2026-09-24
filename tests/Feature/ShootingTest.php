@@ -145,3 +145,39 @@ it('la vista interna mostra le alternative senza nasconderle', function () {
         ->assertSee('Giorgio')
         ->assertSee('Veronica');
 });
+
+it('filtra le sessioni per nome cliente', function () {
+    $admin = User::factory()->admin()->create();
+    $rossi = Client::factory()->create(['name' => 'Rossi Bike']);
+    $verdi = Client::factory()->create(['name' => 'Verdi Cafe']);
+
+    ShootingSession::factory()->for($rossi)->create(['session_date' => today()]);
+    ShootingSession::factory()->for($verdi)->create(['session_date' => today()->addDay()]);
+
+    $this->actingAs($admin)
+        ->get('/shooting?filter[search]=Rossi')
+        ->assertInertia(fn ($page) => $page
+            ->has('sessions', 1)
+            ->where('sessions.0.clientName', 'Rossi Bike')
+            ->where('filters.search', 'Rossi')
+        );
+});
+
+it('ordina le sessioni per data di inserimento in ordine crescente', function () {
+    $admin = User::factory()->admin()->create();
+    $client = Client::factory()->create();
+
+    $prima = ShootingSession::factory()->for($client)->create([
+        'session_date' => today(), 'created_at' => now()->subDay(),
+    ]);
+    $dopo = ShootingSession::factory()->for($client)->create([
+        'session_date' => today()->addDay(), 'created_at' => now(),
+    ]);
+
+    $this->actingAs($admin)
+        ->get('/shooting?sort=created_at')
+        ->assertInertia(fn ($page) => $page
+            ->where('sessions.0.id', $prima->id)
+            ->where('sessions.1.id', $dopo->id)
+        );
+});

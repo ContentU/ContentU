@@ -1,5 +1,5 @@
-import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -69,6 +69,7 @@ type WorkloadRow = {
 
 type Option = { id: number; name: string };
 type QuarterOption = { id: number; clientId: number; label: string };
+type Filters = { search: string | null; sort: string | null };
 
 type Props = {
     targets: Target[];
@@ -78,6 +79,7 @@ type Props = {
     quarters: QuarterOption[];
     assignableUsers: Option[];
     planningRules: string | null;
+    filters: Filters;
 };
 
 export default function ShootingIndex({
@@ -88,6 +90,7 @@ export default function ShootingIndex({
     quarters,
     assignableUsers,
     planningRules,
+    filters,
 }: Props) {
     return (
         <>
@@ -112,6 +115,7 @@ export default function ShootingIndex({
                     sessions={sessions}
                     clients={clients}
                     assignableUsers={assignableUsers}
+                    filters={filters}
                 />
 
                 <WorkloadBlock workload={workload} />
@@ -371,12 +375,42 @@ function SessionsBlock({
     sessions,
     clients,
     assignableUsers,
+    filters,
 }: {
     sessions: Session[];
     clients: Option[];
     assignableUsers: Option[];
+    filters: Filters;
 }) {
     const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState(filters.search ?? '');
+    const sort = filters.sort ?? '-session_date';
+    const skipNextSearchEffect = useRef(true);
+
+    useEffect(() => {
+        if (skipNextSearchEffect.current) {
+            skipNextSearchEffect.current = false;
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            router.get(
+                '/shooting',
+                { 'filter[search]': search || undefined, sort },
+                { preserveState: true, preserveScroll: true, replace: true },
+            );
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [search]);
+
+    const changeSort = (nextSort: string) => {
+        router.get(
+            '/shooting',
+            { 'filter[search]': search || undefined, sort: nextSort },
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
+    };
     const { data, setData, post, processing, errors, reset } = useForm({
         client_id: '',
         session_date: '',
@@ -428,7 +462,7 @@ function SessionsBlock({
 
     return (
         <section className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="font-medium">Calendario sessioni</h2>
 
                 <Dialog open={open} onOpenChange={setOpen}>
@@ -657,6 +691,35 @@ function SessionsBlock({
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+                <Input
+                    type="search"
+                    placeholder="Cerca per cliente…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-56"
+                />
+                <Select value={sort} onValueChange={changeSort}>
+                    <SelectTrigger className="w-56">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="-session_date">
+                            Data sessione (più recenti prima)
+                        </SelectItem>
+                        <SelectItem value="session_date">
+                            Data sessione (meno recenti prima)
+                        </SelectItem>
+                        <SelectItem value="-created_at">
+                            Data di inserimento (più recenti prima)
+                        </SelectItem>
+                        <SelectItem value="created_at">
+                            Data di inserimento (meno recenti prima)
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             <Card className="divide-y divide-border">

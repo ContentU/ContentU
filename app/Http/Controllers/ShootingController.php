@@ -16,14 +16,25 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ShootingController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $sessions = ShootingSession::with(['client:id,name', 'assignments.user:id,name'])
+        $sessions = QueryBuilder::for(ShootingSession::class)
+            ->allowedFilters(
+                AllowedFilter::callback('search', function ($query, string $value) {
+                    $query->whereHas('client', fn ($q) => $q->where('name', 'like', "%{$value}%"));
+                }),
+            )
+            ->allowedSorts('session_date', 'created_at')
+            ->defaultSort('-session_date')
+            // Filtro esistente: mostra solo le sessioni da 7 giorni fa in poi,
+            // indipendentemente dalla ricerca/ordinamento applicati sopra.
             ->where('session_date', '>=', today()->subDays(7))
-            ->orderBy('session_date')
+            ->with(['client:id,name', 'assignments.user:id,name'])
             ->get();
 
         return Inertia::render('shooting/index', [
@@ -71,6 +82,10 @@ class ShootingController extends Controller
                 ->orderBy('name')
                 ->get(['id', 'name']),
             'planningRules' => Setting::get('shooting.planning_rules'),
+            'filters' => [
+                'search' => $request->input('filter.search'),
+                'sort' => $request->input('sort'),
+            ],
         ]);
     }
 
