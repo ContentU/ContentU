@@ -82,11 +82,12 @@ Route::middleware(['auth', 'role:admin,account_manager'])->group(function () {
 Route::middleware('public-link')->prefix('ped/{clientSlug}')->group(function () {
     Route::get('/', [PublicPedController::class, 'entry'])->name('ped.entry');
     Route::post('check-email', [PublicPedController::class, 'checkEmail'])->name('ped.check-email');
-    Route::get('argomenti', [PublicPedController::class, 'topics'])->name('ped.topics');
-    Route::get('feed', [PublicPedController::class, 'feed'])->name('ped.feed');
-    Route::get('shooting', [PublicPedController::class, 'shooting'])->name('ped.shooting');
 
     Route::middleware('auth')->group(function () {
+        Route::get('argomenti', [PublicPedController::class, 'topics'])->name('ped.topics');
+        Route::get('feed', [PublicPedController::class, 'feed'])->name('ped.feed');
+        Route::get('shooting', [PublicPedController::class, 'shooting'])->name('ped.shooting');
+
         Route::post('contents/{content}/approve', [PublicPedController::class, 'approve'])->name('ped.approve');
         Route::post('contents/{content}/reject', [PublicPedController::class, 'reject'])->name('ped.reject');
         Route::post('contents/{content}/comment', [PublicPedController::class, 'comment'])->name('ped.comment');

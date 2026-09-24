@@ -32,6 +32,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserHasRole::class,
             'public-link' => ResolvePublicLink::class,
         ]);
+
+        // Un visitatore non autenticato che richiede una pagina del PED pubblico
+        // va rimandato alla pagina di accesso di QUEL cliente, non al login interno.
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->route('clientSlug') !== null) {
+                return route('ped.entry', $request->route('clientSlug'));
+            }
+
+            return route('login');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

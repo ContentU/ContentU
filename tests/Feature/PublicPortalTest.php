@@ -133,3 +133,20 @@ it('avvisa il cliente quando il trimestre entra in revisione', function () {
 
     Notification::assertSentTo($clientUser, PedReadyForReview::class);
 });
+
+it('reindirizza alla pagina di accesso del cliente se non autenticato, invece di mostrare il feed', function () {
+    $client = Client::factory()->create();
+    ClientPublicLink::factory()->for($client)->create();
+    Quarter::factory()->for($client)->create();
+
+    $this->get("/ped/{$client->slug}/feed")
+        ->assertRedirect(route('ped.entry', $client->slug));
+});
+
+it('reindirizza alla pagina di accesso anche su argomenti e shooting', function () {
+    $client = Client::factory()->create();
+    ClientPublicLink::factory()->for($client)->create();
+
+    $this->get("/ped/{$client->slug}/argomenti")->assertRedirect(route('ped.entry', $client->slug));
+    $this->get("/ped/{$client->slug}/shooting")->assertRedirect(route('ped.entry', $client->slug));
+});
