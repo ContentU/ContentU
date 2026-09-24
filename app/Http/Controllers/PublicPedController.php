@@ -74,6 +74,7 @@ class PublicPedController extends Controller
 
         return Inertia::render('public-ped/topic-preview', [
             'client' => $this->clientPayload($link->client),
+            'clientSlug' => $clientSlug,
             'quarter' => $quarter ? ['label' => $quarter->label] : null,
             'months' => $months->map(fn (TopicPreview $preview) => [
                 'id' => $preview->id,
@@ -143,6 +144,7 @@ class PublicPedController extends Controller
 
         return Inertia::render('public-ped/feed', [
             'client' => $this->clientPayload($link->client),
+            'clientSlug' => $clientSlug,
             'quarter' => $quarter ? ['label' => $quarter->label] : null,
             'contents' => $contents,
             'actions' => [
@@ -160,6 +162,7 @@ class PublicPedController extends Controller
 
         return Inertia::render('public-ped/shooting', [
             'client' => $this->clientPayload($link->client),
+            'clientSlug' => $clientSlug,
             'sessions' => ShootingSession::where('client_id', $link->client_id)
                 ->whereDate('session_date', '>=', today()->subMonths(1))
                 ->orderBy('session_date')

@@ -1,16 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import type { PublicClient } from '@/components/public-ped/client-brand';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-
-type PublicClient = {
-    name: string;
-    initials: string;
-    logoUrl: string | null;
-};
 
 type Item = {
     index: number;
@@ -40,6 +35,7 @@ type Synthesis = {
 
 type Props = {
     client: PublicClient;
+    clientSlug: string;
     quarter: { label: string } | null;
     months: Month[];
     synthesis: Synthesis | null;
@@ -118,32 +114,17 @@ function ApprovalPanel({
 
 export default function PublicPedTopicPreview({
     client,
+    clientSlug,
     quarter,
     months,
     synthesis,
 }: Props) {
-    const clientSlug = window.location.pathname.split('/')[2];
-
     return (
-        <div className="mx-auto max-w-(--container-reading) px-4 py-8">
+        <div className="mx-auto max-w-(--container-reading)">
             <Head title={`${client.name} — Argomenti del piano editoriale`} />
 
             <header className="mb-10 space-y-3 text-center">
-                {client.logoUrl ? (
-                    <img
-                        src={client.logoUrl}
-                        alt={client.name}
-                        className="mx-auto size-14 rounded-md object-contain"
-                    />
-                ) : (
-                    <div className="mx-auto flex size-14 items-center justify-center rounded-md bg-muted font-serif">
-                        {client.initials}
-                    </div>
-                )}
-                <p className="text-sm text-muted-foreground">
-                    Piano editoriale
-                </p>
-                <h1 className="font-serif text-3xl">{client.name}</h1>
+                <h1 className="font-serif text-3xl">Argomenti</h1>
                 {quarter && (
                     <p className="text-sm text-muted-foreground">
                         {quarter.label}

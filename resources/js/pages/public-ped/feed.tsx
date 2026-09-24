@@ -2,16 +2,12 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { ContentDetailPanel } from '@/components/feed/content-detail-panel';
 import { ContentGridView } from '@/components/feed/content-grid-view';
+import type { PublicClient } from '@/components/public-ped/client-brand';
 import type { FeedContent, FeedViewerActions } from '@/types/content';
-
-type PublicClient = {
-    name: string;
-    initials: string;
-    logoUrl: string | null;
-};
 
 type Props = {
     client: PublicClient;
+    clientSlug: string;
     quarter: { label: string } | null;
     contents: FeedContent[];
     actions: FeedViewerActions;
@@ -19,6 +15,7 @@ type Props = {
 
 export default function PublicPedFeed({
     client,
+    clientSlug,
     quarter,
     contents,
     actions,
@@ -28,8 +25,6 @@ export default function PublicPedFeed({
     );
 
     const selected = contents.find((c) => c.id === selectedId) ?? null;
-
-    const clientSlug = window.location.pathname.split('/')[2];
 
     const approve = () => {
         if (!selected) return;
@@ -54,29 +49,16 @@ export default function PublicPedFeed({
     };
 
     return (
-        <div className="mx-auto max-w-5xl px-4 py-8">
+        <div className="mx-auto max-w-5xl">
             <Head title={`${client.name} — Piano editoriale`} />
 
-            <div className="mb-8 flex items-center gap-4">
-                {client.logoUrl ? (
-                    <img
-                        src={client.logoUrl}
-                        alt={client.name}
-                        className="size-12 rounded-md object-contain"
-                    />
-                ) : (
-                    <div className="flex size-12 items-center justify-center rounded-md bg-muted font-serif">
-                        {client.initials}
-                    </div>
+            <div className="mb-6">
+                <h1 className="font-serif text-2xl">Feed contenuti</h1>
+                {quarter && (
+                    <p className="text-sm text-muted-foreground">
+                        {quarter.label}
+                    </p>
                 )}
-                <div>
-                    <h1 className="font-serif text-2xl">{client.name}</h1>
-                    {quarter && (
-                        <p className="text-sm text-muted-foreground">
-                            {quarter.label}
-                        </p>
-                    )}
-                </div>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">

@@ -1,10 +1,5 @@
 import { Head } from '@inertiajs/react';
-
-type PublicClient = {
-    name: string;
-    initials: string;
-    logoUrl: string | null;
-};
+import type { PublicClient } from '@/components/public-ped/client-brand';
 
 type Session = {
     id: number;
@@ -39,21 +34,10 @@ export default function PublicShooting({ client, sessions }: Props) {
             : null;
 
     return (
-        <div className="mx-auto max-w-(--container-reading) px-4 py-8">
+        <div className="mx-auto max-w-(--container-reading)">
             <Head title={`${client.name} — Sessioni di shooting`} />
 
-            <header className="mb-10 space-y-3 text-center">
-                {client.logoUrl ? (
-                    <img
-                        src={client.logoUrl}
-                        alt={client.name}
-                        className="mx-auto size-14 rounded-md object-contain"
-                    />
-                ) : (
-                    <div className="mx-auto flex size-14 items-center justify-center rounded-md bg-muted font-serif">
-                        {client.initials}
-                    </div>
-                )}
+            <header className="mb-10 space-y-1 text-center">
                 <p className="text-sm text-muted-foreground">
                     Sessioni di shooting
                 </p>

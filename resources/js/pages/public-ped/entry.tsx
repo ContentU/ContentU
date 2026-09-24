@@ -1,16 +1,14 @@
 import { Head, useForm } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
+import {
+    ClientBrandMark,
+    type PublicClient,
+} from '@/components/public-ped/client-brand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-
-type PublicClient = {
-    name: string;
-    initials: string;
-    logoUrl: string | null;
-};
 
 type Props = {
     client: PublicClient;
@@ -22,17 +20,7 @@ type Props = {
 function ClientHeader({ client }: { client: PublicClient }) {
     return (
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-            {client.logoUrl ? (
-                <img
-                    src={client.logoUrl}
-                    alt={client.name}
-                    className="size-16 rounded-md object-contain"
-                />
-            ) : (
-                <div className="flex size-16 items-center justify-center rounded-md bg-muted font-serif text-xl">
-                    {client.initials}
-                </div>
-            )}
+            <ClientBrandMark client={client} size="lg" />
             <div>
                 <p className="text-sm text-muted-foreground">
                     Piano editoriale
