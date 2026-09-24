@@ -6,6 +6,9 @@ use App\Enums\ClientStatus;
 use App\Models\Alert;
 use App\Models\Client;
 use App\Models\User;
+use App\Notifications\ClientActionTaken;
+use App\Notifications\ClientShootingFeedback;
+use App\Notifications\TopicPreviewResponded;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -57,6 +60,20 @@ class DashboardController extends Controller
             }),
             'archivedCount' => $archivedCount,
             'filters' => ['status' => $status],
+            'clientFeedback' => $user->unreadNotifications()
+                ->whereIn('type', [ClientActionTaken::class, TopicPreviewResponded::class, ClientShootingFeedback::class])
+                ->latest()
+                ->limit(10)
+                ->get()
+                ->map(fn ($n) => [
+                    'id' => $n->id,
+                    'title' => $n->data['title'] ?? '',
+                    'message' => $n->data['message'] ?? '',
+                    'excerpt' => $n->data['excerpt'] ?? null,
+                    'url' => $n->data['url'] ?? null,
+                    'clientName' => $n->data['clientName'] ?? null,
+                    'createdAt' => $n->created_at->diffForHumans(),
+                ]),
         ]);
     }
 }

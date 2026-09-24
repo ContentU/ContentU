@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Avatar, AvatarFallback, AvatarGroup } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,16 @@ type ClientRow = {
     team: { id: number; name: string; initials: string }[];
 };
 
+type ClientFeedbackItem = {
+    id: string;
+    title: string;
+    message: string;
+    excerpt: string | null;
+    url: string | null;
+    clientName: string | null;
+    createdAt: string;
+};
+
 type Props = {
     stats: {
         activeClients: number;
@@ -25,7 +35,66 @@ type Props = {
     clients: ClientRow[];
     archivedCount: number;
     filters: { status: string };
+    clientFeedback: ClientFeedbackItem[];
 };
+
+function ClientFeedbackCard({ items }: { items: ClientFeedbackItem[] }) {
+    const markRead = (id: string) => {
+        router.patch(`/notifications/${id}/read`, {}, { preserveScroll: true });
+    };
+
+    return (
+        <Card className="mt-6 space-y-3 p-4">
+            <h2 className="font-medium">Commenti e risposte dei clienti</h2>
+
+            {items.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                    Nessun nuovo commento.
+                </p>
+            )}
+
+            {items.length > 0 && (
+                <ul className="divide-y divide-border">
+                    {items.map((item) => (
+                        <li
+                            key={item.id}
+                            className="flex items-start justify-between gap-3 py-3"
+                        >
+                            <div className="min-w-0">
+                                {item.clientName && (
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        {item.clientName}
+                                    </p>
+                                )}
+                                <Link
+                                    href={item.url ?? '#'}
+                                    className="font-medium hover:underline"
+                                >
+                                    {item.title}
+                                </Link>
+                                <p className="text-sm text-muted-foreground">
+                                    {item.excerpt ?? item.message}
+                                </p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {item.createdAt}
+                                </p>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="shrink-0"
+                                onClick={() => markRead(item.id)}
+                            >
+                                Segna come letto
+                            </Button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </Card>
+    );
+}
 
 const FILTERS = [
     { value: '', label: 'Tutti' },
@@ -39,6 +108,7 @@ export default function Dashboard({
     clients,
     archivedCount,
     filters,
+    clientFeedback,
 }: Props) {
     const { auth } = usePage().props;
 
@@ -55,6 +125,8 @@ export default function Dashboard({
                         </Button>
                     )}
                 </div>
+
+                <ClientFeedbackCard items={clientFeedback} />
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Card className="p-4">

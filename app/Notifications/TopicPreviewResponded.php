@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class TopicPreviewResponded extends Notification implements ShouldQueue
 {
@@ -62,6 +63,7 @@ class TopicPreviewResponded extends Notification implements ShouldQueue
             'message' => "Il cliente ha segnato gli argomenti come «{$labels[$this->status]}».",
             'url' => route('quarters.show', $this->preview->quarter_id),
             'clientName' => $this->preview->quarter->client->name,
+            'excerpt' => $this->comment ? Str::limit($this->comment, 140) : null,
         ];
     }
 }

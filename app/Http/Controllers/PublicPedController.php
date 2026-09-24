@@ -138,7 +138,7 @@ class PublicPedController extends Controller
         ]);
 
         Notification::send(
-            $topicPreview->quarter->client->teamMembers,
+            $topicPreview->quarter->client->staffToNotify(),
             new TopicPreviewResponded($topicPreview, $data['status'], $data['comment'] ?? null),
         );
 
@@ -227,7 +227,7 @@ class PublicPedController extends Controller
         $content->recordComment($request->user(), $data['comment']);
         $content->update(['status' => ContentStatus::NeedsChanges->value]);
 
-        $this->notifyTeam($link->client, $content, 'rifiutato');
+        $this->notifyTeam($link->client, $content, 'rifiutato', $data['comment']);
 
         return back();
     }
@@ -245,7 +245,7 @@ class PublicPedController extends Controller
 
         $content->recordComment($request->user(), $data['body']);
 
-        $this->notifyTeam($link->client, $content, 'commentato');
+        $this->notifyTeam($link->client, $content, 'commentato', $data['body']);
 
         return back();
     }
@@ -332,23 +332,13 @@ class PublicPedController extends Controller
         ];
     }
 
-    /** Account manager assegnati + tutti gli admin. */
-    private function notifyTeam(Client $client, Content $content, string $azione): void
+    private function notifyTeam(Client $client, Content $content, string $azione, ?string $comment = null): void
     {
-        $recipients = $client->teamMembers
-            ->merge(User::where('role', 'admin')->where('is_active', true)->get())
-            ->unique('id');
-
-        Notification::send($recipients, new ClientActionTaken($client, $content, $azione));
+        Notification::send($client->staffToNotify(), new ClientActionTaken($client, $content, $azione, $comment));
     }
 
-    /** Account manager assegnati + tutti gli admin. */
     private function notifyShootingFeedback(Client $client, ShootingSession $session, string $azione, ?string $comment = null): void
     {
-        $recipients = $client->teamMembers
-            ->merge(User::where('role', 'admin')->where('is_active', true)->get())
-            ->unique('id');
-
-        Notification::send($recipients, new ClientShootingFeedback($client, $session, $azione, $comment));
+        Notification::send($client->staffToNotify(), new ClientShootingFeedback($client, $session, $azione, $comment));
     }
 }

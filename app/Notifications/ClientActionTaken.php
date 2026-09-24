@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class ClientActionTaken extends Notification implements ShouldQueue
 {
@@ -17,6 +18,7 @@ class ClientActionTaken extends Notification implements ShouldQueue
         public Client $client,
         public Content $content,
         public string $azione,
+        public ?string $comment = null,
     ) {}
 
     /**
@@ -46,6 +48,7 @@ class ClientActionTaken extends Notification implements ShouldQueue
             'message' => "Il cliente {$this->client->name} ha {$this->azione} il contenuto «{$this->content->title}».",
             'url' => route('quarters.show', $this->content->quarter_id),
             'clientName' => $this->client->name,
+            'excerpt' => $this->comment ? Str::limit($this->comment, 140) : null,
         ];
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class Client extends Model
@@ -112,6 +113,19 @@ class Client extends Model
     public function shootingSessions(): HasMany
     {
         return $this->hasMany(ShootingSession::class);   // Fase 12
+    }
+
+    /**
+     * Chi avvisare quando il cliente agisce nel PED (approva, rifiuta, commenta):
+     * i membri del team assegnati + tutti gli admin attivi, anche quelli non assegnati.
+     *
+     * @return Collection<int, User>
+     */
+    public function staffToNotify(): Collection
+    {
+        return $this->teamMembers
+            ->merge(User::where('role', UserRole::Admin->value)->where('is_active', true)->get())
+            ->unique('id');
     }
 
     /** Un solo posto per scegliere QUALE trimestre mostrare: il corrente, o il più recente. */
