@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ClientStatus;
+use App\Enums\UserRole;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -60,6 +61,16 @@ class Client extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    /**
+     * Utenti-cliente esterni con accesso autorizzato al PED (allowlist gestita dall'admin).
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function pedAccessUsers(): BelongsToMany
+    {
+        return $this->users()->where('role', UserRole::Client->value);
     }
 
     /**

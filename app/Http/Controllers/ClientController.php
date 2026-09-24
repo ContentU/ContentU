@@ -127,7 +127,12 @@ class ClientController extends Controller
         }
 
         $client->update($data);
-        $client->users()->sync($request->input('user_ids', []));
+
+        // Il form gestisce solo l'assegnazione del team interno: non deve mai
+        // toccare gli utenti-cliente con accesso al PED (gestiti a parte da
+        // ClientAccessController), altrimenti li scollega a ogni salvataggio.
+        $pedAccessIds = $client->pedAccessUsers()->pluck('users.id');
+        $client->users()->sync($pedAccessIds->merge($request->input('user_ids', []))->unique());
 
         Inertia::flash('message', 'Cliente aggiornato.');
 
