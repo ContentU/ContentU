@@ -256,7 +256,7 @@ class PublicPedController extends Controller
     /**
      * Solo i campi pubblici del cliente: mai note interne, tone of voice, dati di altri clienti.
      *
-     * @return array{name: string, initials: string, logoUrl: string|null}
+     * @return array{name: string, initials: string, logoUrl: string|null, topicsArtifactUrl: string|null, shootingArtifactUrl: string|null}
      */
     private function clientPayload(Client $client): array
     {
@@ -264,6 +264,8 @@ class PublicPedController extends Controller
             'name' => $client->name,
             'initials' => $client->initials(),
             'logoUrl' => $client->logo_path ? Storage::url($client->logo_path) : null,
+            'topicsArtifactUrl' => $client->topics_artifact_url,
+            'shootingArtifactUrl' => $client->shooting_artifact_url,
         ];
     }
 

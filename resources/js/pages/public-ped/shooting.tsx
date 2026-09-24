@@ -1,5 +1,7 @@
 import { Head } from '@inertiajs/react';
 import type { PublicClient } from '@/components/public-ped/client-brand';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 type Session = {
     id: number;
@@ -43,6 +45,21 @@ export default function PublicShooting({ client, sessions }: Props) {
                 </p>
                 <h1 className="font-serif text-3xl">{client.name}</h1>
             </header>
+
+            {client.shootingArtifactUrl && (
+                <Card className="mx-auto mb-10 max-w-md space-y-2 p-4 text-center">
+                    <h2 className="font-medium">Strategia dello shooting</h2>
+                    <Button asChild>
+                        <a
+                            href={client.shootingArtifactUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Apri presentazione
+                        </a>
+                    </Button>
+                </Card>
+            )}
 
             {sessions.length > 0 ? (
                 <>

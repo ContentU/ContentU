@@ -129,6 +129,21 @@ it('SICUREZZA — un cliente non vede le sessioni di un altro cliente', function
         ->assertInertia(fn ($page) => $page->has('sessions', 0));
 });
 
+it('la risposta include il link dell\'artifact della strategia shooting', function () {
+    $client = Client::factory()->create([
+        'shooting_artifact_url' => 'https://claude.ai/public/artifacts/abc',
+    ]);
+    ClientPublicLink::factory()->for($client)->create();
+    $user = User::factory()->client()->create();
+    $user->clients()->attach($client);
+
+    $this->actingAs($user)->get("/ped/{$client->slug}/shooting")
+        ->assertInertia(fn ($page) => $page->where(
+            'client.shootingArtifactUrl',
+            'https://claude.ai/public/artifacts/abc',
+        ));
+});
+
 it('la vista interna mostra le alternative senza nasconderle', function () {
     $admin = User::factory()->admin()->create();
     $session = ShootingSession::factory()->create(['session_date' => today()->addWeek()]);

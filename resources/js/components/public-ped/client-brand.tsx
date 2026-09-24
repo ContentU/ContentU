@@ -2,6 +2,8 @@ export type PublicClient = {
     name: string;
     initials: string;
     logoUrl: string | null;
+    topicsArtifactUrl?: string | null;
+    shootingArtifactUrl?: string | null;
 };
 
 const SIZE_CLASSES = {

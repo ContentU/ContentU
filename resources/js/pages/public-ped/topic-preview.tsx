@@ -137,6 +137,23 @@ export default function PublicPedTopicPreview({
                 </p>
             </header>
 
+            {client.topicsArtifactUrl && (
+                <Card className="mx-auto mb-10 max-w-md space-y-2 p-4 text-center">
+                    <h2 className="font-medium">
+                        Presentazione degli argomenti
+                    </h2>
+                    <Button asChild>
+                        <a
+                            href={client.topicsArtifactUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Apri presentazione
+                        </a>
+                    </Button>
+                </Card>
+            )}
+
             {months.length > 0 && (
                 <nav className="mb-10 flex flex-wrap justify-center gap-2">
                     {months.map((month) => (
