@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContentType;
+use App\Support\ArtifactPromptRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -25,7 +26,20 @@ class ContentTypeController extends Controller
                     'isActive' => $type->is_active,
                     'sortOrder' => $type->sort_order,
                 ]),
+            'artifactPromptRules' => ArtifactPromptRules::current(),
         ]);
+    }
+
+    /** Regole globali del prompt per gli artifact Claude (Fase 02). */
+    public function updateArtifactPromptRules(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['value' => ['nullable', 'string']]);
+
+        ArtifactPromptRules::set($data['value'] ?? null);
+
+        Inertia::flash('message', 'Regole prompt artifact aggiornate.');
+
+        return back();
     }
 
     public function store(Request $request): RedirectResponse

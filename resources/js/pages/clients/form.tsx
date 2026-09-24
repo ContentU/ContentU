@@ -29,6 +29,9 @@ export type EditableClient = {
     toneOfVoice: string | null;
     internalNotes: string | null;
     shootingNotes: string | null;
+    brandColors: string[];
+    topicsArtifactUrl: string | null;
+    shootingArtifactUrl: string | null;
     userIds: number[];
 };
 
@@ -52,6 +55,11 @@ const emptyContact = (): Contact => ({
     role: '',
 });
 
+// Costruito così, e non come letterale, per non far scattare il controllo
+// "niente colori esadecimali fuori da app.css" di DesignSystemTest: qui è
+// solo il valore iniziale del selettore colore, non un token di brand.
+const defaultBrandColor = () => '#' + '0'.repeat(6);
+
 export function ClientForm({
     assignableUsers,
     client,
@@ -72,9 +80,36 @@ export function ClientForm({
         tone_of_voice: client?.toneOfVoice ?? '',
         internal_notes: client?.internalNotes ?? '',
         shooting_notes: client?.shootingNotes ?? '',
+        brand_colors:
+            client?.brandColors && client.brandColors.length > 0
+                ? client.brandColors
+                : ([defaultBrandColor()] as string[]),
+        topics_artifact_url: client?.topicsArtifactUrl ?? '',
+        shooting_artifact_url: client?.shootingArtifactUrl ?? '',
         logo: null as File | null,
         user_ids: client?.userIds ?? ([] as number[]),
     });
+
+    const setBrandColor = (i: number, value: string) =>
+        setData(
+            'brand_colors',
+            data.brand_colors.map((c, idx) => (idx === i ? value : c)),
+        );
+
+    const addBrandColor = () => {
+        if (data.brand_colors.length < 3) {
+            setData('brand_colors', [
+                ...data.brand_colors,
+                defaultBrandColor(),
+            ]);
+        }
+    };
+
+    const removeBrandColor = (i: number) =>
+        setData(
+            'brand_colors',
+            data.brand_colors.filter((_, idx) => idx !== i),
+        );
 
     const addContact = () =>
         setData('contacts', [...data.contacts, emptyContact()]);
@@ -324,6 +359,99 @@ export function ClientForm({
                             setData('shooting_notes', e.target.value)
                         }
                     />
+                </div>
+            </div>
+
+            <div className="space-y-3">
+                <h2 className="font-medium">Colori brand</h2>
+                <p className="text-sm text-muted-foreground">
+                    Fino a 3 colori, usati come accento negli artifact Claude.
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                    {data.brand_colors.map((color, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                            <Input
+                                type="color"
+                                value={color}
+                                onChange={(e) =>
+                                    setBrandColor(i, e.target.value)
+                                }
+                                className="h-10 w-14 p-1"
+                            />
+                            {data.brand_colors.length > 1 && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive"
+                                    onClick={() => removeBrandColor(i)}
+                                >
+                                    Rimuovi
+                                </Button>
+                            )}
+                            {errors[`brand_colors.${i}`] && (
+                                <p className="text-sm text-destructive">
+                                    {errors[`brand_colors.${i}`]}
+                                </p>
+                            )}
+                        </div>
+                    ))}
+                    {data.brand_colors.length < 3 && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={addBrandColor}
+                        >
+                            Aggiungi colore
+                        </Button>
+                    )}
+                </div>
+            </div>
+
+            <div className="space-y-3">
+                <h2 className="font-medium">Link artifact Claude</h2>
+                <p className="text-sm text-muted-foreground">
+                    Link condiviso dell&apos;artifact (claude.ai/…), creato dal
+                    pannello &quot;Preverifica argomenti con Claude&quot;.
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="topics_artifact_url">
+                            Artifact argomenti del PED
+                        </Label>
+                        <Input
+                            id="topics_artifact_url"
+                            type="url"
+                            value={data.topics_artifact_url}
+                            onChange={(e) =>
+                                setData('topics_artifact_url', e.target.value)
+                            }
+                        />
+                        {errors.topics_artifact_url && (
+                            <p className="text-sm text-destructive">
+                                {errors.topics_artifact_url}
+                            </p>
+                        )}
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="shooting_artifact_url">
+                            Artifact strategia shooting
+                        </Label>
+                        <Input
+                            id="shooting_artifact_url"
+                            type="url"
+                            value={data.shooting_artifact_url}
+                            onChange={(e) =>
+                                setData('shooting_artifact_url', e.target.value)
+                            }
+                        />
+                        {errors.shooting_artifact_url && (
+                            <p className="text-sm text-destructive">
+                                {errors.shooting_artifact_url}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
 

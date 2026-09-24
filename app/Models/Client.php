@@ -21,6 +21,7 @@ class Client extends Model
         'name', 'slug', 'brand_name', 'status', 'paused_at', 'contacts',
         'logo_path', 'brand_colors', 'tone_of_voice',
         'internal_notes', 'shooting_notes',
+        'topics_artifact_url', 'shooting_artifact_url',
     ];
 
     protected static function booted(): void
