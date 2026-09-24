@@ -1,7 +1,0 @@
-[build]
-command = "composer install --no-interaction --prefer-dist --no-dev --no-scripts --ignore-platform-reqs && npm run build"
-publish = "dist"
-
-[build.environment]
-PHP_VERSION = "8.3"
-SKIP_WAYFINDER = "true"

@@ -5,43 +5,23 @@ import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig, lazyPlugins } from 'vite-plus';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 export default defineConfig({
-    resolve: {
-        alias: {
-            '@': resolve(__dirname, './resources/js'),
-        },
-    },
-    plugins: lazyPlugins(() => {
-        const plugins = [
-            laravel({
-                input: ['resources/css/app.css', 'resources/js/app.tsx'],
-                refresh: true,
-            }),
-            inertia(),
-            react(),
-            babel({
-                presets: [reactCompilerPreset()],
-            }),
-            tailwindcss(),
-        ];
-
-        // Disable wayfinder on environments without PHP 8.4+ support
-        if (!process.env.SKIP_WAYFINDER) {
-            plugins.push(
-                wayfinder({
-                    formVariants: true,
-                })
-            );
-        }
-
-        return plugins;
-    }),
+    plugins: lazyPlugins(() => [
+        laravel({
+            input: ['resources/css/app.css', 'resources/js/app.tsx'],
+            refresh: true,
+        }),
+        inertia(),
+        react(),
+        babel({
+            presets: [reactCompilerPreset()],
+        }),
+        tailwindcss(),
+        wayfinder({
+            formVariants: true,
+        }),
+    ]),
     server: {
         watch: {
             ignored: [
