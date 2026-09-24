@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import Heading from '@/components/heading';
+import { SessionsCalendarView } from '@/components/shooting/sessions-calendar-view';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,6 +25,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+
+const SESSIONS_LAYOUT_STORAGE_KEY = 'shooting-sessions-layout';
 
 type Role = 'photo' | 'video' | 'coordination';
 type ShootingType = 'photo' | 'video' | 'photo_video';
@@ -386,6 +389,21 @@ function SessionsBlock({
     const [search, setSearch] = useState(filters.search ?? '');
     const sort = filters.sort ?? '-session_date';
     const skipNextSearchEffect = useRef(true);
+    const [sessionsLayout, setSessionsLayout] = useState<'list' | 'calendar'>(
+        'list',
+    );
+
+    useEffect(() => {
+        const stored = localStorage.getItem(SESSIONS_LAYOUT_STORAGE_KEY);
+        if (stored === 'list' || stored === 'calendar') {
+            setSessionsLayout(stored);
+        }
+    }, []);
+
+    const changeSessionsLayout = (next: 'list' | 'calendar') => {
+        setSessionsLayout(next);
+        localStorage.setItem(SESSIONS_LAYOUT_STORAGE_KEY, next);
+    };
 
     useEffect(() => {
         if (skipNextSearchEffect.current) {
@@ -720,76 +738,109 @@ function SessionsBlock({
                         </SelectItem>
                     </SelectContent>
                 </Select>
+
+                <div className="flex gap-2">
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={
+                            sessionsLayout === 'list' ? 'default' : 'outline'
+                        }
+                        onClick={() => changeSessionsLayout('list')}
+                    >
+                        Elenco
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={
+                            sessionsLayout === 'calendar'
+                                ? 'default'
+                                : 'outline'
+                        }
+                        onClick={() => changeSessionsLayout('calendar')}
+                    >
+                        Calendario
+                    </Button>
+                </div>
             </div>
 
-            <Card className="divide-y divide-border">
-                {sessions.length > 0 && (
-                    <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                        <span>Data · cliente · tipo</span>
-                        <span>Assegnazioni (F/V/C)</span>
-                    </div>
-                )}
+            {sessionsLayout === 'calendar' && (
+                <Card className="p-4">
+                    <SessionsCalendarView sessions={sessions} />
+                </Card>
+            )}
 
-                {sessions.map((s) => (
-                    <div key={s.id} className="space-y-2 p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="font-medium">
-                                {s.dateLabel} · {s.clientName} · {s.typeLabel}
-                            </p>
-                            {s.checkpointRequired && (
-                                <Badge
-                                    variant="outline"
-                                    className="bg-status-review-bg text-status-review"
-                                >
-                                    Checkpoint richiesto
-                                </Badge>
+            {sessionsLayout === 'list' && (
+                <Card className="divide-y divide-border">
+                    {sessions.length > 0 && (
+                        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                            <span>Data · cliente · tipo</span>
+                            <span>Assegnazioni (F/V/C)</span>
+                        </div>
+                    )}
+
+                    {sessions.map((s) => (
+                        <div key={s.id} className="space-y-2 p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <p className="font-medium">
+                                    {s.dateLabel} · {s.clientName} · {s.typeLabel}
+                                </p>
+                                {s.checkpointRequired && (
+                                    <Badge
+                                        variant="outline"
+                                        className="bg-status-review-bg text-status-review"
+                                    >
+                                        Checkpoint richiesto
+                                    </Badge>
+                                )}
+                            </div>
+
+                            {s.checkpointRequired && s.checkpointNote && (
+                                <p className="text-sm text-muted-foreground">
+                                    {s.checkpointNote}
+                                </p>
+                            )}
+
+                            {s.assignments.length > 0 ? (
+                                <div className="flex flex-wrap gap-3 text-sm">
+                                    {s.assignments
+                                        .filter((a) => !a.isAlternative)
+                                        .map((a, i) => {
+                                            const alt = s.assignments.find(
+                                                (x) =>
+                                                    x.isAlternative &&
+                                                    x.role === a.role,
+                                            );
+
+                                            return (
+                                                <span key={i}>
+                                                    {a.roleInitial}: {a.userName}
+                                                    {alt && (
+                                                        <span className="text-muted-foreground">
+                                                            {' '}
+                                                            · (alt. {alt.userName})
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            );
+                                        })}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Nessuna assegnazione.
+                                </p>
                             )}
                         </div>
+                    ))}
 
-                        {s.checkpointRequired && s.checkpointNote && (
-                            <p className="text-sm text-muted-foreground">
-                                {s.checkpointNote}
-                            </p>
-                        )}
-
-                        {s.assignments.length > 0 ? (
-                            <div className="flex flex-wrap gap-3 text-sm">
-                                {s.assignments
-                                    .filter((a) => !a.isAlternative)
-                                    .map((a, i) => {
-                                        const alt = s.assignments.find(
-                                            (x) =>
-                                                x.isAlternative &&
-                                                x.role === a.role,
-                                        );
-
-                                        return (
-                                            <span key={i}>
-                                                {a.roleInitial}: {a.userName}
-                                                {alt && (
-                                                    <span className="text-muted-foreground">
-                                                        {' '}
-                                                        · (alt. {alt.userName})
-                                                    </span>
-                                                )}
-                                            </span>
-                                        );
-                                    })}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">
-                                Nessuna assegnazione.
-                            </p>
-                        )}
-                    </div>
-                ))}
-
-                {sessions.length === 0 && (
-                    <p className="p-4 text-sm text-muted-foreground">
-                        Nessuna sessione pianificata.
-                    </p>
-                )}
-            </Card>
+                    {sessions.length === 0 && (
+                        <p className="p-4 text-sm text-muted-foreground">
+                            Nessuna sessione pianificata.
+                        </p>
+                    )}
+                </Card>
+            )}
         </section>
     );
 }
