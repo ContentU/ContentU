@@ -5,13 +5,11 @@ namespace App\Http\Controllers;
 use App\Enums\UserRole;
 use App\Models\Client;
 use App\Models\User;
-use App\Notifications\ClientPedInvite;
+use App\Support\PedInvite;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -50,9 +48,13 @@ class ClientAccessController extends Controller
 
         $client->users()->attach($user->id);
 
-        $this->sendInvite($user, $client);
-
-        Inertia::flash('message', 'Invito inviato.');
+        try {
+            PedInvite::send($user, $client);
+            Inertia::flash('message', 'Invito inviato.');
+        } catch (\Throwable $e) {
+            report($e);
+            Inertia::flash('error', "Impossibile inviare l'invito: l'email non è stata spedita.");
+        }
 
         return back();
     }
@@ -76,17 +78,14 @@ class ClientAccessController extends Controller
 
         abort_unless($client->pedAccessUsers()->whereKey($user->id)->exists(), 404);
 
-        $this->sendInvite($user, $client);
-
-        Inertia::flash('message', 'Invito inviato di nuovo.');
+        try {
+            PedInvite::send($user, $client);
+            Inertia::flash('message', 'Invito inviato di nuovo.');
+        } catch (\Throwable $e) {
+            report($e);
+            Inertia::flash('error', "Impossibile inviare l'invito: l'email non è stata spedita.");
+        }
 
         return back();
-    }
-
-    private function sendInvite(User $user, Client $client): void
-    {
-        $token = Password::broker()->createToken($user);
-
-        Notification::send($user, new ClientPedInvite($token, $client));
     }
 }

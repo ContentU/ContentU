@@ -35,6 +35,22 @@ it('mostra login per un\'email autorizzata che ha già impostato la password', f
         ->assertInertia(fn ($page) => $page->where('mode', 'login'));
 });
 
+it('check-email in pending_invite invia di nuovo ClientPedInvite, con throttle', function () {
+    Notification::fake();
+
+    $client = Client::factory()->create();
+    ClientPublicLink::factory()->for($client)->create();
+    $user = User::factory()->client()->create(['password_set_at' => null]);
+    $client->users()->attach($user->id);
+
+    $this->post("/ped/{$client->slug}/check-email", ['email' => $user->email]);
+    Notification::assertSentToTimes($user, ClientPedInvite::class, 1);
+
+    // Una seconda richiesta entro 60 secondi non deve reinviare l'invito.
+    $this->post("/ped/{$client->slug}/check-email", ['email' => $user->email]);
+    Notification::assertSentToTimes($user, ClientPedInvite::class, 1);
+});
+
 it('l\'admin che aggiunge un\'email crea l\'utente e invia l\'invito', function () {
     Notification::fake();
 
@@ -62,6 +78,22 @@ it('non permette di aggiungere due volte la stessa email per lo stesso cliente',
     $this->actingAs($admin)
         ->post("/clients/{$client->id}/access", ['email' => $user->email])
         ->assertSessionHasErrors('email');
+});
+
+it('se l\'invio email fallisce, l\'invito admin mostra un errore e non va in 500', function () {
+    Notification::shouldReceive('send')->once()->andThrow(new Exception('transport non disponibile'));
+
+    $admin = User::factory()->admin()->create();
+    $client = Client::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->post("/clients/{$client->id}/access", ['email' => 'altro.cliente@example.com']);
+
+    $response->assertRedirect();
+
+    $user = User::where('email', 'altro.cliente@example.com')->first();
+    expect($user)->not->toBeNull();
+    expect($client->pedAccessUsers()->whereKey($user->id)->exists())->toBeTrue();
 });
 
 it('rimuove l\'accesso di un cliente senza cancellare l\'utente', function () {

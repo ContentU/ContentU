@@ -42,7 +42,13 @@ services:
           - key: QUEUE_CONNECTION
             value: sync
           - key: MAIL_MAILER
-            value: log
+            value: resend
+          - key: RESEND_API_KEY
+            sync: false
+          - key: MAIL_FROM_ADDRESS
+            sync: false
+          - key: MAIL_FROM_NAME
+            value: Contentu PED
           - key: FILESYSTEM_DISK
             value: local
           - key: SEED_ADMIN_EMAIL

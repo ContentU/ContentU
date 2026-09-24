@@ -5,8 +5,11 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Responses\ClientAwareAuthResponse;
+use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -36,6 +39,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureViews();
         $this->configureRateLimiting();
         $this->configureLoginRedirect();
+        $this->configureResetPasswordMail();
     }
 
     /**
@@ -107,5 +111,26 @@ class FortifyServiceProvider extends ServiceProvider
     {
         $this->app->instance(LoginResponse::class, new ClientAwareAuthResponse);
         $this->app->instance(RegisterResponse::class, new ClientAwareAuthResponse);
+    }
+
+    /**
+     * Email di reset password in italiano, sullo stesso schema di ClientPedInvite:
+     * URL assoluto costruito con url(route(..., false)) perché il frontend è SPA.
+     */
+    private function configureResetPasswordMail(): void
+    {
+        ResetPassword::toMailUsing(function (User $notifiable, string $token) {
+            $url = url(route('password.reset', [
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ], false));
+
+            return (new MailMessage)
+                ->subject('Reimposta la password del PED')
+                ->line('Hai richiesto di reimpostare la password del tuo account PED.')
+                ->action('Reimposta password', $url)
+                ->line('Il link scade tra 60 minuti.')
+                ->line('Se non hai richiesto questa modifica, ignora questa email.');
+        });
     }
 }

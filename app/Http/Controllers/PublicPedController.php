@@ -12,10 +12,12 @@ use App\Models\TopicPreview;
 use App\Models\User;
 use App\Notifications\ClientActionTaken;
 use App\Notifications\TopicPreviewResponded;
+use App\Support\PedInvite;
 use App\Support\TopicSynthesis;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -54,6 +56,10 @@ class PublicPedController extends Controller
             ! $user->hasSetPassword() => 'pending_invite',
             default => 'login',
         };
+
+        if ($mode === 'pending_invite') {
+            $this->resendInvite($user, $link->client);
+        }
 
         return Inertia::render('public-ped/entry', [
             'client' => $this->clientPayload($link->client),
@@ -223,6 +229,24 @@ class PublicPedController extends Controller
         $this->notifyTeam($link->client, $content, 'commentato');
 
         return back();
+    }
+
+    /** Al massimo un invito ogni 60 secondi per email, per non spammare Resend né la casella del cliente. */
+    private function resendInvite(User $user, Client $client): void
+    {
+        $key = 'ped-invite:'.$user->email;
+
+        if (RateLimiter::tooManyAttempts($key, 1)) {
+            return;
+        }
+
+        RateLimiter::hit($key, 60);
+
+        try {
+            PedInvite::send($user, $client);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     private function link(Request $request): ClientPublicLink

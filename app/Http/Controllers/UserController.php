@@ -49,7 +49,13 @@ class UserController extends Controller
             'is_active' => true,
         ]);
 
-        Password::sendResetLink(['email' => $user->email]);
+        $status = Password::sendResetLink(['email' => $user->email]);
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            Inertia::flash('error', "Utente creato ma l'invito a {$user->email} non è partito.");
+
+            return back();
+        }
 
         Inertia::flash('message', "Invito inviato a {$user->email}.");
 

@@ -79,6 +79,30 @@ class PasswordResetTest extends TestCase
         });
     }
 
+    public function test_reset_password_notification_is_in_italian_with_correct_url()
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+
+        $this->post(route('password.email'), ['email' => $user->email]);
+
+        Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $notification) use ($user) {
+            $mail = $notification->toMail($user);
+
+            expect($mail->subject)->toBe('Reimposta la password del PED');
+
+            $expectedUrl = url(route('password.reset', [
+                'token' => $notification->token,
+                'email' => $user->getEmailForPasswordReset(),
+            ], false));
+
+            expect($mail->actionUrl)->toBe($expectedUrl);
+
+            return true;
+        });
+    }
+
     public function test_password_cannot_be_reset_with_invalid_token(): void
     {
         $user = User::factory()->create();
