@@ -29,9 +29,13 @@ class UserSeeder extends Seeder
 
         $users = [
             ['Admin ContentU',   config('ped.seed.admin_email'), UserRole::Admin],
-            ['Account Manager',  'am@example.com',                             UserRole::AccountManager],
-            ['Copywriter',       'copy@example.com',                           UserRole::Copywriter],
         ];
+
+        // Utenti demo con email prevedibili: solo in locale/test, mai in produzione.
+        if (app()->environment('local', 'testing')) {
+            $users[] = ['Account Manager',  'am@example.com',   UserRole::AccountManager];
+            $users[] = ['Copywriter',       'copy@example.com', UserRole::Copywriter];
+        }
 
         foreach ($users as [$name, $email, $role]) {
             User::updateOrCreate(
