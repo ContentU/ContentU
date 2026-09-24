@@ -94,7 +94,23 @@ class ClientController extends Controller
             ],
             'assignableUsers' => $this->assignableUsers(),
             'publicLink' => $this->publicLinkPayload($client),
+            'accessUsers' => $this->accessUsersPayload($client),
         ]);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function accessUsersPayload(Client $client): array
+    {
+        return $client->pedAccessUsers()
+            ->get()
+            ->map(fn (User $user) => [
+                'id' => $user->id,
+                'email' => $user->email,
+                'hasSetPassword' => $user->hasSetPassword(),
+                'invitedAt' => $user->created_at->format('d/m/Y H:i'),
+            ])
+            ->values()
+            ->all();
     }
 
     /** @return array<string, mixed>|null */
