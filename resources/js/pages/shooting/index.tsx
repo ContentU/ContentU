@@ -214,9 +214,9 @@ function TargetsBlock({
                 Scheda clienti: target vs pianificato
             </h2>
 
-            <Card className="divide-y divide-border">
+            <Card className="overflow-hidden">
                 {targets.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-4 px-4 py-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                    <div className="flex flex-wrap items-center gap-4 border-b border-border px-4 py-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
                         <p className="min-w-40 flex-1">Cliente · periodo</p>
                         <p className="font-mono">
                             Target ideale → pianificate + potenziali
@@ -224,46 +224,56 @@ function TargetsBlock({
                     </div>
                 )}
 
-                {targets.map((t) => (
+                {targets.length > 0 && (
+                    // Al massimo 5 righe visibili: oltre, si scorre dentro il riquadro
+                    // (5 * min-h-22), senza far crescere la Card all'infinito.
                     <div
-                        key={t.id}
-                        className="flex flex-wrap items-center gap-4 p-4"
+                        tabIndex={0}
+                        aria-label="Elenco target clienti"
+                        className="max-h-110 divide-y divide-border overflow-y-auto"
                     >
-                        <div className="min-w-40 flex-1">
-                            <p className="flex items-center gap-1.5 font-medium">
-                                {t.clientName}
-                                {t.shootingArtifactUrl && (
-                                    <a
-                                        href={t.shootingArtifactUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={`Strategia shooting di ${t.clientName}`}
-                                        className="text-muted-foreground hover:text-foreground"
-                                    >
-                                        <ExternalLink className="size-3.5" />
-                                    </a>
+                        {targets.map((t) => (
+                            <div
+                                key={t.id}
+                                className="flex min-h-22 flex-wrap items-center gap-4 p-4"
+                            >
+                                <div className="min-w-40 flex-1">
+                                    <p className="flex items-center gap-1.5 font-medium">
+                                        {t.clientName}
+                                        {t.shootingArtifactUrl && (
+                                            <a
+                                                href={t.shootingArtifactUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                aria-label={`Strategia shooting di ${t.clientName}`}
+                                                className="text-muted-foreground hover:text-foreground"
+                                            >
+                                                <ExternalLink className="size-3.5" />
+                                            </a>
+                                        )}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {t.periodLabel} · peso {t.weight}
+                                    </p>
+                                </div>
+                                <p
+                                    className={cn(
+                                        'font-mono text-sm',
+                                        t.atRisk && 'text-destructive',
+                                    )}
+                                >
+                                    {t.idealSessions} → {t.plannedSessions} +{' '}
+                                    {t.potentialSessions} potenziale
+                                </p>
+                                {t.statusNote && (
+                                    <p className="text-sm text-muted-foreground">
+                                        {t.statusNote}
+                                    </p>
                                 )}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                {t.periodLabel} · peso {t.weight}
-                            </p>
-                        </div>
-                        <p
-                            className={cn(
-                                'font-mono text-sm',
-                                t.atRisk && 'text-destructive',
-                            )}
-                        >
-                            {t.idealSessions} → {t.plannedSessions} +{' '}
-                            {t.potentialSessions} potenziale
-                        </p>
-                        {t.statusNote && (
-                            <p className="text-sm text-muted-foreground">
-                                {t.statusNote}
-                            </p>
-                        )}
+                            </div>
+                        ))}
                     </div>
-                ))}
+                )}
 
                 {targets.length === 0 && (
                     <p className="p-4 text-sm text-muted-foreground">
