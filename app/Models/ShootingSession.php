@@ -58,7 +58,7 @@ class ShootingSession extends Model
      * Solo i campi che il cliente può vedere (decisione B).
      * Usa SEMPRE questo metodo per le viste pubbliche: non costruire l'array a mano.
      *
-     * @return array{id: int, date: string, dateLabel: string, type: string, typeLabel: string}
+     * @return array{id: int, date: string, dateLabel: string, type: string, typeLabel: string, isTentative: bool}
      */
     public function toClientArray(): array
     {
@@ -68,6 +68,7 @@ class ShootingSession extends Model
             'dateLabel' => $this->session_date->translatedFormat('D j M Y'),
             'type' => $this->type->value,
             'typeLabel' => $this->type->label(),
+            'isTentative' => $this->is_tentative,
         ];
     }
 }

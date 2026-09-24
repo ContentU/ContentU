@@ -129,6 +129,21 @@ it('SICUREZZA — un cliente non vede le sessioni di un altro cliente', function
         ->assertInertia(fn ($page) => $page->has('sessions', 0));
 });
 
+it('la risposta espone isTentative per il PED pubblico', function () {
+    $client = Client::factory()->create();
+    ClientPublicLink::factory()->for($client)->create();
+    ShootingSession::factory()->for($client)->create([
+        'session_date' => today()->addWeek(),
+        'is_tentative' => true,
+    ]);
+
+    $user = User::factory()->client()->create();
+    $user->clients()->attach($client);
+
+    $this->actingAs($user)->get("/ped/{$client->slug}/shooting")
+        ->assertInertia(fn ($page) => $page->where('sessions.0.isTentative', true));
+});
+
 it('la risposta include il link dell\'artifact della strategia shooting', function () {
     $client = Client::factory()->create([
         'shooting_artifact_url' => 'https://claude.ai/public/artifacts/abc',
