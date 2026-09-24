@@ -1,14 +1,21 @@
-import { Link, usePage } from '@inertiajs/react';
-import { NotificationBell } from '@/components/notification-bell';
-import {
-    ClientBrandMark,
-    type PublicClient,
-} from '@/components/public-ped/client-brand';
+import { usePage } from '@inertiajs/react';
+import { AppContent } from '@/components/app-content';
+import { AppShell } from '@/components/app-shell';
+import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { PedSidebar } from '@/components/ped-sidebar';
+import type { PublicClient } from '@/components/public-ped/client-brand';
+import { useCurrentUrl } from '@/hooks/use-current-url';
 
 type PageProps = {
     client: PublicClient;
     clientSlug: string;
     auth: { user: { role: string } | null };
+};
+
+const SECTION_LABELS: Record<string, string> = {
+    argomenti: 'Argomenti',
+    feed: 'Feed',
+    shooting: 'Shooting',
 };
 
 export default function PublicPedLayout({
@@ -17,41 +24,37 @@ export default function PublicPedLayout({
     children: React.ReactNode;
 }) {
     const { client, clientSlug, auth } = usePage<PageProps>().props;
+    const { currentUrl } = useCurrentUrl();
     const isAdmin = auth.user?.role === 'admin';
 
-    const tabs = [
-        { href: `/ped/${clientSlug}/argomenti`, label: 'Argomenti' },
-        { href: `/ped/${clientSlug}/feed`, label: 'Feed' },
-        { href: `/ped/${clientSlug}/shooting`, label: 'Shooting' },
-    ];
+    const section = currentUrl.split('/').filter(Boolean).pop() ?? '';
+    const sectionLabel = SECTION_LABELS[section] ?? '';
 
     return (
-        <div className="min-h-screen bg-background">
-            {isAdmin && (
-                <p className="bg-brand-rose-tint px-4 py-2 text-center text-xs text-foreground md:px-6">
-                    Stai visualizzando il PED come admin: le modifiche sono
-                    visibili subito al cliente.
-                </p>
-            )}
-            <header className="flex h-16 items-center justify-between gap-4 border-b px-4 md:px-6">
-                <div className="flex items-center gap-3">
-                    <ClientBrandMark client={client} />
-                    <span className="font-serif text-lg">{client.name}</span>
-                </div>
-                <nav className="hidden gap-1 md:flex">
-                    {tabs.map((tab) => (
-                        <Link
-                            key={tab.href}
-                            href={tab.href}
-                            className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                            {tab.label}
-                        </Link>
-                    ))}
-                </nav>
-                <NotificationBell />
-            </header>
-            <main className="p-4 md:p-6">{children}</main>
-        </div>
+        <AppShell variant="sidebar">
+            <PedSidebar />
+            <AppContent variant="sidebar" className="min-w-0 overflow-x-clip">
+                <AppSidebarHeader
+                    breadcrumbs={[
+                        {
+                            title: client.name,
+                            href: `/ped/${clientSlug}/argomenti`,
+                        },
+                        ...(sectionLabel
+                            ? [{ title: sectionLabel, href: '#' }]
+                            : []),
+                    ]}
+                />
+
+                {isAdmin && (
+                    <p className="bg-brand-rose-tint px-4 py-2 text-center text-xs text-foreground md:px-6">
+                        Stai visualizzando il PED come admin: le modifiche sono
+                        visibili subito al cliente.
+                    </p>
+                )}
+
+                <div className="p-4 md:p-6">{children}</div>
+            </AppContent>
+        </AppShell>
     );
 }
