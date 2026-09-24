@@ -204,6 +204,15 @@ function TargetsBlock({
             </h2>
 
             <Card className="divide-y divide-border">
+                {targets.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-4 px-4 py-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                        <p className="min-w-40 flex-1">Cliente · periodo</p>
+                        <p className="font-mono">
+                            Target ideale → pianificate + potenziali
+                        </p>
+                    </div>
+                )}
+
                 {targets.map((t) => (
                     <div
                         key={t.id}
@@ -238,6 +247,14 @@ function TargetsBlock({
                     </p>
                 )}
             </Card>
+            {targets.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                    <strong>Target ideale</strong> = sessioni che
+                    servirebbero nel trimestre. <strong>Pianificate</strong> =
+                    già calendarizzate. <strong>Potenziali</strong> = di
+                    riserva, non ancora confermate.
+                </p>
+            )}
 
             <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
                 <div className="grid gap-2">
@@ -643,6 +660,13 @@ function SessionsBlock({
             </div>
 
             <Card className="divide-y divide-border">
+                {sessions.length > 0 && (
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                        <span>Data · cliente · tipo</span>
+                        <span>Assegnazioni (F/V/C)</span>
+                    </div>
+                )}
+
                 {sessions.map((s) => (
                     <div key={s.id} className="space-y-2 p-4">
                         <div className="flex flex-wrap items-center justify-between gap-2">
