@@ -39,7 +39,11 @@ ENV APP_ENV=production \
 COPY --from=build /app /app
 COPY docker/php.ini $PHP_INI_DIR/conf.d/zz-app.ini
 
-RUN chmod +x docker/start.sh \
+# The official image grants frankenphp cap_net_bind_service (ports < 1024); hosts that
+# run containers with reduced privileges (Render) refuse to exec it ("Operation not
+# permitted"). We listen on $PORT (> 1024), so the capability isn't needed.
+RUN setcap -r /usr/local/bin/frankenphp \
+    && chmod +x docker/start.sh \
     && chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 8080
