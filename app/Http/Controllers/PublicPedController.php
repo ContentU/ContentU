@@ -6,7 +6,6 @@ use App\Enums\ContentStatus;
 use App\Models\Client;
 use App\Models\ClientPublicLink;
 use App\Models\Content;
-use App\Models\Quarter;
 use App\Models\ShootingSession;
 use App\Models\TopicPreview;
 use App\Models\User;
@@ -72,7 +71,7 @@ class PublicPedController extends Controller
     public function topics(Request $request, string $clientSlug): Response
     {
         $link = $this->link($request);
-        $quarter = $this->currentQuarter($link->client);
+        $quarter = $link->client->currentOrLatestQuarter();
 
         $months = $quarter
             ? $quarter->topicPreviews()->with('items')->orderBy('month_order')->get()
@@ -138,7 +137,7 @@ class PublicPedController extends Controller
     public function feed(Request $request, string $clientSlug): Response
     {
         $link = $this->link($request);
-        $quarter = $this->currentQuarter($link->client);
+        $quarter = $link->client->currentOrLatestQuarter();
 
         $contents = $quarter
             ? $quarter->contents()
@@ -252,13 +251,6 @@ class PublicPedController extends Controller
     private function link(Request $request): ClientPublicLink
     {
         return $request->attributes->get('publicLink');
-    }
-
-    /** Un solo posto per scegliere QUALE trimestre mostrare al cliente: il corrente, o il più recente. */
-    private function currentQuarter(Client $client): ?Quarter
-    {
-        return $client->quarters()->current()->first()
-            ?? $client->quarters()->orderByDesc('year')->orderByDesc('quarter_number')->first();
     }
 
     /**

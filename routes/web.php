@@ -29,6 +29,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:admin,account_manager,copywriter'])->group(function () {
     Route::resource('clients', ClientController::class)->except(['show']);
+    Route::patch('clients/{client}/artifact-links', [ClientController::class, 'updateArtifactLinks'])
+        ->name('clients.artifact-links.update');
 
     Route::get('clients/{client}/quarters', [QuarterController::class, 'index'])->name('quarters.index');
     Route::post('clients/{client}/quarters', [QuarterController::class, 'store'])->name('quarters.store');

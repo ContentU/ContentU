@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ClientStatus;
 use App\Models\Client;
 use App\Models\User;
+use App\Support\ArtifactPromptBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -98,7 +99,28 @@ class ClientController extends Controller
             'assignableUsers' => $this->assignableUsers(),
             'publicLink' => $this->publicLinkPayload($client),
             'accessUsers' => $this->accessUsersPayload($client),
+            'artifactPrompts' => [
+                'topics' => ArtifactPromptBuilder::forTopics($client, $client->currentOrLatestQuarter()),
+                'shooting' => ArtifactPromptBuilder::forShooting($client),
+            ],
         ]);
+    }
+
+    /** Salvataggio leggero dei soli link artifact, senza reinviare tutto il form cliente. */
+    public function updateArtifactLinks(Request $request, Client $client): RedirectResponse
+    {
+        $this->authorize('update', $client);
+
+        $data = $request->validate([
+            'topics_artifact_url' => ['nullable', 'url:https', 'max:2048'],
+            'shooting_artifact_url' => ['nullable', 'url:https', 'max:2048'],
+        ]);
+
+        $client->update($data);
+
+        Inertia::flash('message', 'Link artifact salvati.');
+
+        return back();
     }
 
     /** @return array<int, array<string, mixed>> */

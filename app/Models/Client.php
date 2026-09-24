@@ -114,6 +114,13 @@ class Client extends Model
         return $this->hasMany(ShootingSession::class);   // Fase 12
     }
 
+    /** Un solo posto per scegliere QUALE trimestre mostrare: il corrente, o il più recente. */
+    public function currentOrLatestQuarter(): ?Quarter
+    {
+        return $this->quarters()->current()->first()
+            ?? $this->quarters()->orderByDesc('year')->orderByDesc('quarter_number')->first();
+    }
+
     public function initials(): string
     {
         $words = preg_split('/\s+/', trim($this->name));
