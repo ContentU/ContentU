@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Enums\ClientStatus;
 use App\Models\Client;
 use App\Models\User;
-use App\Support\ArtifactPromptBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -99,10 +98,6 @@ class ClientController extends Controller
             'assignableUsers' => $this->assignableUsers(),
             'publicLink' => $this->publicLinkPayload($client),
             'accessUsers' => $this->accessUsersPayload($client),
-            'artifactPrompts' => [
-                'topics' => ArtifactPromptBuilder::forTopics($client, $client->currentOrLatestQuarter()),
-                'shooting' => ArtifactPromptBuilder::forShooting($client),
-            ],
         ]);
     }
 
@@ -208,8 +203,6 @@ class ClientController extends Controller
             'shooting_notes' => ['nullable', 'string'],
             'brand_colors' => ['nullable', 'array', 'max:3'],
             'brand_colors.*' => ['regex:/^#[0-9a-fA-F]{6}$/'],
-            'topics_artifact_url' => ['nullable', 'url:https', 'max:2048'],
-            'shooting_artifact_url' => ['nullable', 'url:https', 'max:2048'],
             'logo' => ['nullable', 'image', 'max:'.config('ped.logo_max_kb')],
             'user_ids' => ['nullable', 'array'],
             'user_ids.*' => ['integer', 'exists:users,id'],

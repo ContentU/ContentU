@@ -73,8 +73,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('settings')->group(function ()
     Route::resource('content-types', ContentTypeController::class)
         ->except(['show', 'create', 'edit'])
         ->names('settings.content-types');
-    Route::put('artifact-prompt-rules', [ContentTypeController::class, 'updateArtifactPromptRules'])
-        ->name('settings.artifact-prompt-rules.update');
 
     Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::post('users', [UserController::class, 'store'])->name('users.store');

@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 type PublicLink = {
     id: number;
@@ -26,17 +25,11 @@ type AccessUser = {
     invitedAt: string;
 };
 
-type ArtifactPrompts = {
-    topics: string;
-    shooting: string;
-};
-
 type Props = {
     client: EditableClient;
     assignableUsers: AssignableUser[];
     publicLink: PublicLink | null;
     accessUsers: AccessUser[];
-    artifactPrompts: ArtifactPrompts;
 };
 
 function PublicLinkPanel({
@@ -217,153 +210,109 @@ function ClientAccessPanel({
     );
 }
 
-function ArtifactBlock({
-    title,
-    initialPrompt,
-    artifactUrl,
-    onSaveUrl,
-    savingUrl,
-    urlError,
+function ArtifactLinkField({
+    label,
+    url,
+    onChange,
+    error,
 }: {
-    title: string;
-    initialPrompt: string;
-    artifactUrl: string;
-    onSaveUrl: (url: string) => void;
-    savingUrl: boolean;
-    urlError?: string;
+    label: string;
+    url: string;
+    onChange: (url: string) => void;
+    error?: string;
 }) {
-    const [prompt, setPrompt] = useState(initialPrompt);
-    const [url, setUrl] = useState(artifactUrl);
-
-    const copyAndOpen = () => {
-        void navigator.clipboard.writeText(prompt);
-        window.open('https://claude.ai/new', '_blank', 'noopener');
-        toast.success('Prompt copiato: incollalo in Claude');
-    };
-
     const copyLink = () => {
         void navigator.clipboard.writeText(url);
         toast.success('Link copiato');
     };
 
     return (
-        <div className="space-y-3">
-            <h3 className="font-medium">{title}</h3>
-
-            <Textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={8}
-                className="font-mono text-xs"
-            />
-
-            <Button type="button" onClick={copyAndOpen}>
-                Copia prompt e apri Claude
-            </Button>
-
-            <div className="grid gap-2 pt-2">
-                <Label>Link artifact condiviso</Label>
-                <div className="flex flex-wrap items-center gap-2">
-                    <Input
-                        type="url"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        placeholder="https://claude.ai/public/artifacts/…"
-                        className="max-w-md"
-                    />
-                    <Button
-                        type="button"
-                        variant="outline"
-                        disabled={savingUrl}
-                        onClick={() => onSaveUrl(url)}
-                    >
-                        Salva
-                    </Button>
-                    {artifactUrl && (
-                        <>
-                            <a
-                                href={artifactUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-primary underline underline-offset-2 hover:text-primary/80"
-                            >
-                                Apri
-                            </a>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={copyLink}
-                            >
-                                Copia link
-                            </Button>
-                        </>
-                    )}
-                </div>
-                {urlError && (
-                    <p className="text-sm text-destructive">{urlError}</p>
+        <div className="grid gap-2">
+            <Label>{label}</Label>
+            <div className="flex flex-wrap items-center gap-2">
+                <Input
+                    type="url"
+                    value={url}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder="https://claude.ai/public/artifacts/…"
+                    className="max-w-md"
+                />
+                {url && (
+                    <>
+                        <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary underline underline-offset-2 hover:text-primary/80"
+                        >
+                            Apri
+                        </a>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={copyLink}
+                        >
+                            Copia link
+                        </Button>
+                    </>
                 )}
             </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
     );
 }
 
-function ArtifactPanel({
+function ArtifactLinksPanel({
     clientId,
-    artifactPrompts,
     topicsArtifactUrl,
     shootingArtifactUrl,
 }: {
     clientId: number;
-    artifactPrompts: ArtifactPrompts;
     topicsArtifactUrl: string | null;
     shootingArtifactUrl: string | null;
 }) {
-    const { setData, patch, transform, processing, errors } = useForm({
+    const { data, setData, patch, processing, errors } = useForm({
         topics_artifact_url: topicsArtifactUrl ?? '',
         shooting_artifact_url: shootingArtifactUrl ?? '',
     });
 
-    const save = (
-        field: 'topics_artifact_url' | 'shooting_artifact_url',
-        url: string,
-    ) => {
-        setData(field, url);
-        // transform legge lo stato aggiornato sincrono al momento dell'invio,
-        // evitando la corsa tra setData (asincrono) e patch().
-        transform((data) => ({ ...data, [field]: url }));
-        patch(`/clients/${clientId}/artifact-links`, { preserveScroll: true });
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        patch(`/clients/${clientId}/artifact-links`, {
+            preserveScroll: true,
+        });
     };
 
     return (
-        <Card className="max-w-2xl space-y-6 p-4">
+        <Card className="max-w-2xl space-y-4 p-4">
             <div>
-                <h2 className="font-medium">
-                    Preverifica argomenti con Claude
-                </h2>
+                <h2 className="font-medium">Link artifact Claude</h2>
                 <p className="text-sm text-muted-foreground">
                     In Claude: crea l&apos;artifact → Condividi → copia il link
                     pubblico.
                 </p>
             </div>
 
-            <ArtifactBlock
-                title="Argomenti del PED"
-                initialPrompt={artifactPrompts.topics}
-                artifactUrl={topicsArtifactUrl ?? ''}
-                savingUrl={processing}
-                urlError={errors.topics_artifact_url}
-                onSaveUrl={(url) => save('topics_artifact_url', url)}
-            />
+            <form onSubmit={submit} className="space-y-4">
+                <ArtifactLinkField
+                    label="Presentazione argomenti"
+                    url={data.topics_artifact_url}
+                    onChange={(url) => setData('topics_artifact_url', url)}
+                    error={errors.topics_artifact_url}
+                />
 
-            <ArtifactBlock
-                title="Strategia shooting"
-                initialPrompt={artifactPrompts.shooting}
-                artifactUrl={shootingArtifactUrl ?? ''}
-                savingUrl={processing}
-                urlError={errors.shooting_artifact_url}
-                onSaveUrl={(url) => save('shooting_artifact_url', url)}
-            />
+                <ArtifactLinkField
+                    label="Strategia shooting"
+                    url={data.shooting_artifact_url}
+                    onChange={(url) => setData('shooting_artifact_url', url)}
+                    error={errors.shooting_artifact_url}
+                />
+
+                <Button type="submit" disabled={processing}>
+                    Salva
+                </Button>
+            </form>
         </Card>
     );
 }
@@ -373,7 +322,6 @@ export default function ClientsEdit({
     assignableUsers,
     publicLink,
     accessUsers,
-    artifactPrompts,
 }: Props) {
     return (
         <>
@@ -397,9 +345,8 @@ export default function ClientsEdit({
                 </div>
 
                 <div className="mt-8">
-                    <ArtifactPanel
+                    <ArtifactLinksPanel
                         clientId={client.id}
-                        artifactPrompts={artifactPrompts}
                         topicsArtifactUrl={client.topicsArtifactUrl}
                         shootingArtifactUrl={client.shootingArtifactUrl}
                     />

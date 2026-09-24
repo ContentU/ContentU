@@ -84,8 +84,6 @@ export function ClientForm({
             client?.brandColors && client.brandColors.length > 0
                 ? client.brandColors
                 : ([defaultBrandColor()] as string[]),
-        topics_artifact_url: client?.topicsArtifactUrl ?? '',
-        shooting_artifact_url: client?.shootingArtifactUrl ?? '',
         logo: null as File | null,
         user_ids: client?.userIds ?? ([] as number[]),
     });
@@ -406,52 +404,6 @@ export function ClientForm({
                             Aggiungi colore
                         </Button>
                     )}
-                </div>
-            </div>
-
-            <div className="space-y-3">
-                <h2 className="font-medium">Link artifact Claude</h2>
-                <p className="text-sm text-muted-foreground">
-                    Link condiviso dell&apos;artifact (claude.ai/…), creato dal
-                    pannello &quot;Preverifica argomenti con Claude&quot;.
-                </p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                        <Label htmlFor="topics_artifact_url">
-                            Artifact argomenti del PED
-                        </Label>
-                        <Input
-                            id="topics_artifact_url"
-                            type="url"
-                            value={data.topics_artifact_url}
-                            onChange={(e) =>
-                                setData('topics_artifact_url', e.target.value)
-                            }
-                        />
-                        {errors.topics_artifact_url && (
-                            <p className="text-sm text-destructive">
-                                {errors.topics_artifact_url}
-                            </p>
-                        )}
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="shooting_artifact_url">
-                            Artifact strategia shooting
-                        </Label>
-                        <Input
-                            id="shooting_artifact_url"
-                            type="url"
-                            value={data.shooting_artifact_url}
-                            onChange={(e) =>
-                                setData('shooting_artifact_url', e.target.value)
-                            }
-                        />
-                        {errors.shooting_artifact_url && (
-                            <p className="text-sm text-destructive">
-                                {errors.shooting_artifact_url}
-                            </p>
-                        )}
-                    </div>
                 </div>
             </div>
 

@@ -1,12 +1,10 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 type ContentType = {
     id: number;
@@ -19,70 +17,9 @@ type ContentType = {
 
 type Props = {
     contentTypes: ContentType[];
-    artifactPromptRules: string;
 };
 
-function ArtifactPromptRulesCard({ initialValue }: { initialValue: string }) {
-    const [editing, setEditing] = useState(false);
-    const { data, setData, put, processing } = useForm({
-        value: initialValue,
-    });
-
-    return (
-        <Card className="space-y-3 p-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="font-medium">
-                        Regole prompt artifact Claude
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                        Usate per comporre il prompt "Preverifica argomenti con
-                        Claude" nella scheda cliente.
-                    </p>
-                </div>
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditing((v) => !v)}
-                >
-                    {editing ? 'Annulla' : 'Modifica'}
-                </Button>
-            </div>
-
-            {editing ? (
-                <div className="space-y-2">
-                    <Textarea
-                        value={data.value}
-                        onChange={(e) => setData('value', e.target.value)}
-                        rows={10}
-                    />
-                    <Button
-                        type="button"
-                        size="sm"
-                        disabled={processing}
-                        onClick={() =>
-                            put('/settings/artifact-prompt-rules', {
-                                onSuccess: () => setEditing(false),
-                            })
-                        }
-                    >
-                        Salva
-                    </Button>
-                </div>
-            ) : (
-                <p className="text-sm whitespace-pre-line text-muted-foreground">
-                    {data.value}
-                </p>
-            )}
-        </Card>
-    );
-}
-
-export default function ContentTypesSettings({
-    contentTypes,
-    artifactPromptRules,
-}: Props) {
+export default function ContentTypesSettings({ contentTypes }: Props) {
     const { data, setData, post, processing, errors, reset } = useForm({
         key: '',
         label: '',
@@ -221,8 +158,6 @@ export default function ContentTypesSettings({
                         Aggiungi tipologia
                     </Button>
                 </form>
-
-                <ArtifactPromptRulesCard initialValue={artifactPromptRules} />
             </div>
         </>
     );
