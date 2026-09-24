@@ -39,12 +39,13 @@ class ShootingController extends Controller
             ->get();
 
         return Inertia::render('shooting/index', [
-            'targets' => ShootingTarget::with(['client:id,name', 'quarter:id,label'])
+            'targets' => ShootingTarget::with(['client:id,name,shooting_artifact_url', 'quarter:id,label'])
                 ->orderByDesc('quarter_id')
                 ->get()
                 ->map(fn (ShootingTarget $t) => [
                     'id' => $t->id,
                     'clientName' => $t->client->name,
+                    'shootingArtifactUrl' => $t->client->shooting_artifact_url,
                     'periodLabel' => $t->period_label,
                     'weight' => $t->weight,
                     'idealSessions' => $t->ideal_sessions,

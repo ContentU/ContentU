@@ -32,6 +32,21 @@ it('registra un target trimestrale con sessioni potenziali', function () {
         ->and($target->potential_sessions)->toBe(1);
 });
 
+it('la vista /shooting espone il link artifact del cliente accanto al target', function () {
+    $admin = User::factory()->admin()->create();
+    $client = Client::factory()->create([
+        'shooting_artifact_url' => 'https://claude.ai/public/artifacts/strategia',
+    ]);
+    $quarter = Quarter::factory()->for($client)->create();
+    ShootingTarget::factory()->for($client)->for($quarter)->create();
+
+    $this->actingAs($admin)->get('/shooting')
+        ->assertInertia(fn ($page) => $page->where(
+            'targets.0.shootingArtifactUrl',
+            'https://claude.ai/public/artifacts/strategia',
+        ));
+});
+
 it('calcola il carico contando una sola giornata per persona su due ruoli', function () {
     $user = User::factory()->accountManager()->create();
     $session = ShootingSession::factory()->create(['session_date' => today()]);

@@ -1,4 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
+import { ExternalLink } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Heading from '@/components/heading';
 import { SessionsCalendarView } from '@/components/shooting/sessions-calendar-view';
@@ -34,6 +35,7 @@ type ShootingType = 'photo' | 'video' | 'photo_video';
 type Target = {
     id: number;
     clientName: string;
+    shootingArtifactUrl: string | null;
     periodLabel: string;
     weight: string;
     idealSessions: number;
@@ -228,7 +230,20 @@ function TargetsBlock({
                         className="flex flex-wrap items-center gap-4 p-4"
                     >
                         <div className="min-w-40 flex-1">
-                            <p className="font-medium">{t.clientName}</p>
+                            <p className="flex items-center gap-1.5 font-medium">
+                                {t.clientName}
+                                {t.shootingArtifactUrl && (
+                                    <a
+                                        href={t.shootingArtifactUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        aria-label={`Strategia shooting di ${t.clientName}`}
+                                        className="text-muted-foreground hover:text-foreground"
+                                    >
+                                        <ExternalLink className="size-3.5" />
+                                    </a>
+                                )}
+                            </p>
                             <p className="text-sm text-muted-foreground">
                                 {t.periodLabel} · peso {t.weight}
                             </p>
