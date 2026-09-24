@@ -1,3 +1,5 @@
+import type { ThreadComment } from '@/components/comments/comment-thread';
+
 export type ContentStatus =
     | 'draft'
     | 'in_review'
@@ -33,10 +35,4 @@ export type FeedViewerActions = {
     canEdit: boolean; // SEMPRE false per il cliente esterno
 };
 
-export type ContentComment = {
-    id: number;
-    authorLabel: 'Cliente' | 'Team';
-    authorName: string;
-    body: string;
-    createdAtLabel: string;
-};
+export type ContentComment = ThreadComment;

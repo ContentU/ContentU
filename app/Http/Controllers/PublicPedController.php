@@ -10,6 +10,7 @@ use App\Models\ShootingSession;
 use App\Models\TopicPreview;
 use App\Models\User;
 use App\Notifications\ClientActionTaken;
+use App\Notifications\ClientShootingFeedback;
 use App\Notifications\TopicPreviewResponded;
 use App\Support\PedInvite;
 use App\Support\TopicSynthesis;
@@ -249,6 +250,49 @@ class PublicPedController extends Controller
         return back();
     }
 
+    public function approveShooting(Request $request, string $clientSlug, ShootingSession $shootingSession): RedirectResponse
+    {
+        $link = $this->link($request);
+
+        abort_unless($shootingSession->client_id === $link->client_id, 404);
+        abort_unless($request->user()->isClient(), 403);
+
+        $shootingSession->update([
+            'client_approved_at' => now(),
+            'client_approved_by' => $request->user()->id,
+        ]);
+
+        $this->notifyShootingFeedback($link->client, $shootingSession, 'approvata');
+
+        Inertia::flash('message', 'Sessione approvata.');
+
+        return back();
+    }
+
+    public function commentShooting(Request $request, string $clientSlug, ShootingSession $shootingSession): RedirectResponse
+    {
+        $link = $this->link($request);
+
+        abort_unless($shootingSession->client_id === $link->client_id, 404);
+        abort_unless($request->user()->isClient(), 403);
+
+        $data = $request->validate([
+            'body' => ['required', 'string', 'max:5000'],
+        ]);
+
+        $shootingSession->comments()->create([
+            'author_id' => $request->user()->id,
+            'author_role' => 'client',
+            'body' => $data['body'],
+        ]);
+
+        $this->notifyShootingFeedback($link->client, $shootingSession, 'commentata', $data['body']);
+
+        Inertia::flash('message', 'Commento inviato al team.');
+
+        return back();
+    }
+
     /** Al massimo un invito ogni 60 secondi per email, per non spammare Resend né la casella del cliente. */
     private function resendInvite(User $user, Client $client): void
     {
@@ -296,5 +340,15 @@ class PublicPedController extends Controller
             ->unique('id');
 
         Notification::send($recipients, new ClientActionTaken($client, $content, $azione));
+    }
+
+    /** Account manager assegnati + tutti gli admin. */
+    private function notifyShootingFeedback(Client $client, ShootingSession $session, string $azione, ?string $comment = null): void
+    {
+        $recipients = $client->teamMembers
+            ->merge(User::where('role', 'admin')->where('is_active', true)->get())
+            ->unique('id');
+
+        Notification::send($recipients, new ClientShootingFeedback($client, $session, $azione, $comment));
     }
 }

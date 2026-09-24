@@ -23,6 +23,7 @@ class ShootingSession extends Model
     protected $fillable = [
         'client_id', 'session_date', 'type', 'is_tentative',
         'checkpoint_required', 'checkpoint_note', 'internal_note',
+        'client_approved_at', 'client_approved_by',
     ];
 
     protected function casts(): array
@@ -32,6 +33,7 @@ class ShootingSession extends Model
             'type' => ShootingType::class,
             'is_tentative' => 'boolean',
             'checkpoint_required' => 'boolean',
+            'client_approved_at' => 'datetime',
         ];
     }
 
@@ -54,14 +56,28 @@ class ShootingSession extends Model
             ->withPivot('role', 'is_alternative');
     }
 
+    /** @return HasMany<ShootingSessionComment, $this> */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ShootingSessionComment::class);
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function clientApprovedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'client_approved_by');
+    }
+
     /**
      * Solo i campi che il cliente può vedere (decisione B).
      * Usa SEMPRE questo metodo per le viste pubbliche: non costruire l'array a mano.
      *
-     * @return array{id: int, date: string, dateLabel: string, type: string, typeLabel: string, isTentative: bool}
+     * @return array{id: int, date: string, dateLabel: string, type: string, typeLabel: string, isTentative: bool, clientApprovedAt: string|null, comments: array<int, array<string, mixed>>}
      */
     public function toClientArray(): array
     {
+        $this->loadMissing('comments.author');
+
         return [
             'id' => $this->id,
             'date' => $this->session_date->toDateString(),
@@ -69,6 +85,21 @@ class ShootingSession extends Model
             'type' => $this->type->value,
             'typeLabel' => $this->type->label(),
             'isTentative' => $this->is_tentative,
+            'clientApprovedAt' => $this->client_approved_at?->toIso8601String(),
+            'comments' => $this->comments
+                ->sortBy('created_at')
+                ->values()
+                ->map(function (ShootingSessionComment $comment) {
+                    $comment->created_at?->locale('it');
+
+                    return [
+                        'id' => $comment->id,
+                        'authorLabel' => $comment->authorLabel(),
+                        'authorName' => $comment->author->name,
+                        'body' => $comment->body,
+                        'createdAtLabel' => $comment->created_at?->translatedFormat('j M, H:i'),
+                    ];
+                })->all(),
         ];
     }
 }

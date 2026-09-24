@@ -1,5 +1,9 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import {
+    CommentThread,
+    type ThreadComment,
+} from '@/components/comments/comment-thread';
 import { ShootingSessionEditDialog } from '@/components/ped-admin/shooting-session-edit-dialog';
 import type { PublicClient } from '@/components/public-ped/client-brand';
 import { SessionsCalendarView } from '@/components/shooting/sessions-calendar-view';
@@ -21,6 +25,8 @@ type Session = {
     type: 'photo' | 'video' | 'photo_video';
     typeLabel: string;
     isTentative: boolean;
+    clientApprovedAt: string | null;
+    comments: ThreadComment[];
 };
 
 type Actions = {
@@ -31,6 +37,7 @@ type Actions = {
 
 type Props = {
     client: PublicClient;
+    clientSlug: string;
     sessions: Session[];
     actions: Actions;
 };
@@ -48,16 +55,34 @@ function prevalentType(sessions: Session[]): string | null {
     return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-/** Dettaglio sessione: solo lettura per ora, la Fase 07 aggiunge approvazione e commenti. */
+/** Dettaglio sessione: stato di approvazione e commenti del cliente. */
 function SessionDetailDialog({
     session,
+    clientSlug,
     actions,
     onOpenChange,
 }: {
     session: Session;
+    clientSlug: string;
     actions: Actions;
     onOpenChange: (open: boolean) => void;
 }) {
+    const approve = () => {
+        router.post(
+            `/ped/${clientSlug}/shooting/${session.id}/approve`,
+            {},
+            { preserveScroll: true },
+        );
+    };
+
+    const submitComment = (body: string) => {
+        router.post(
+            `/ped/${clientSlug}/shooting/${session.id}/comment`,
+            { body },
+            { preserveScroll: true },
+        );
+    };
+
     return (
         <Dialog open onOpenChange={onOpenChange}>
             <DialogContent>
@@ -70,6 +95,20 @@ function SessionDetailDialog({
                         {session.typeLabel}
                         {session.isTentative && ' · provvisoria'}
                     </p>
+                    {session.clientApprovedAt ? (
+                        <p className="text-status-approved">
+                            Approvata il{' '}
+                            {new Date(
+                                session.clientApprovedAt,
+                            ).toLocaleDateString('it-IT')}
+                        </p>
+                    ) : (
+                        actions.canApprove && (
+                            <Button size="sm" onClick={approve}>
+                                Approva
+                            </Button>
+                        )
+                    )}
                 </div>
 
                 {actions.canEdit && (
@@ -77,12 +116,26 @@ function SessionDetailDialog({
                         <ShootingSessionEditDialog session={session} />
                     </div>
                 )}
+
+                <div className="border-t border-border pt-3">
+                    <CommentThread
+                        comments={session.comments}
+                        onSubmit={
+                            actions.canComment ? submitComment : undefined
+                        }
+                    />
+                </div>
             </DialogContent>
         </Dialog>
     );
 }
 
-export default function PublicShooting({ client, sessions, actions }: Props) {
+export default function PublicShooting({
+    client,
+    clientSlug,
+    sessions,
+    actions,
+}: Props) {
     const [view, setView] = useState<'list' | 'calendar'>('list');
     const [selected, setSelected] = useState<Session | null>(null);
 
@@ -196,7 +249,10 @@ export default function PublicShooting({ client, sessions, actions }: Props) {
                         {view === 'calendar' ? (
                             <Card className="p-4">
                                 <SessionsCalendarView
-                                    sessions={sessions}
+                                    sessions={sessions.map((s) => ({
+                                        ...s,
+                                        isApproved: s.clientApprovedAt !== null,
+                                    }))}
                                     onSelect={setSelected}
                                 />
                             </Card>
@@ -239,6 +295,7 @@ export default function PublicShooting({ client, sessions, actions }: Props) {
             {selected && (
                 <SessionDetailDialog
                     session={selected}
+                    clientSlug={clientSlug}
                     actions={actions}
                     onOpenChange={(open) => !open && setSelected(null)}
                 />

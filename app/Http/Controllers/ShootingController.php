@@ -35,6 +35,7 @@ class ShootingController extends Controller
             // indipendentemente dalla ricerca/ordinamento applicati sopra.
             ->where('session_date', '>=', today()->subDays(7))
             ->with(['client:id,name', 'assignments.user:id,name'])
+            ->withCount('comments')
             ->get();
 
         return Inertia::render('shooting/index', [
@@ -61,6 +62,8 @@ class ShootingController extends Controller
                 'typeLabel' => $s->type->label(),
                 'checkpointRequired' => $s->checkpoint_required,
                 'checkpointNote' => $s->checkpoint_note,
+                'clientApprovedAt' => $s->client_approved_at?->format('d/m/Y'),
+                'commentsCount' => $s->comments_count,
                 'assignments' => $s->assignments->map(fn (ShootingSessionAssignment $a) => [
                     'role' => $a->role->value,
                     'roleInitial' => $a->role->initial(),
@@ -160,6 +163,13 @@ class ShootingController extends Controller
             'type' => ['required', Rule::in(['photo', 'video', 'photo_video'])],
             'is_tentative' => ['boolean'],
         ]);
+
+        // Se cambiano data o tipo, l'approvazione del cliente non è più valida per la nuova sessione.
+        if ($data['session_date'] !== $shootingSession->session_date->toDateString()
+            || $data['type'] !== $shootingSession->type->value) {
+            $data['client_approved_at'] = null;
+            $data['client_approved_by'] = null;
+        }
 
         $shootingSession->update($data);
 

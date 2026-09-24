@@ -104,6 +104,9 @@ Route::middleware('public-link')->prefix('ped/{clientSlug}')->group(function () 
         Route::post('contents/{content}/reject', [PublicPedController::class, 'reject'])->name('ped.reject');
         Route::post('contents/{content}/comment', [PublicPedController::class, 'comment'])->name('ped.comment');
         Route::post('topics/{topicPreview}/respond', [PublicPedController::class, 'respondToTopics'])->name('ped.topics.respond');
+
+        Route::post('shooting/{shootingSession}/approve', [PublicPedController::class, 'approveShooting'])->name('ped.shooting.approve');
+        Route::post('shooting/{shootingSession}/comment', [PublicPedController::class, 'commentShooting'])->name('ped.shooting.comment');
     });
 });
 

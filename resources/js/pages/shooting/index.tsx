@@ -59,6 +59,8 @@ type Session = {
     typeLabel: string;
     checkpointRequired: boolean;
     checkpointNote: string | null;
+    clientApprovedAt: string | null;
+    commentsCount: number;
     assignments: Assignment[];
 };
 
@@ -256,10 +258,10 @@ function TargetsBlock({
             </Card>
             {targets.length > 0 && (
                 <p className="text-xs text-muted-foreground">
-                    <strong>Target ideale</strong> = sessioni che
-                    servirebbero nel trimestre. <strong>Pianificate</strong> =
-                    già calendarizzate. <strong>Potenziali</strong> = di
-                    riserva, non ancora confermate.
+                    <strong>Target ideale</strong> = sessioni che servirebbero
+                    nel trimestre. <strong>Pianificate</strong> = già
+                    calendarizzate. <strong>Potenziali</strong> = di riserva,
+                    non ancora confermate.
                 </p>
             )}
 
@@ -784,16 +786,32 @@ function SessionsBlock({
                         <div key={s.id} className="space-y-2 p-4">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <p className="font-medium">
-                                    {s.dateLabel} · {s.clientName} · {s.typeLabel}
+                                    {s.dateLabel} · {s.clientName} ·{' '}
+                                    {s.typeLabel}
                                 </p>
-                                {s.checkpointRequired && (
-                                    <Badge
-                                        variant="outline"
-                                        className="bg-status-review-bg text-status-review"
-                                    >
-                                        Checkpoint richiesto
-                                    </Badge>
-                                )}
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {s.clientApprovedAt && (
+                                        <Badge
+                                            variant="outline"
+                                            className="bg-status-approved-bg text-status-approved"
+                                        >
+                                            Approvata il {s.clientApprovedAt}
+                                        </Badge>
+                                    )}
+                                    {s.commentsCount > 0 && (
+                                        <Badge variant="outline">
+                                            {s.commentsCount} commenti
+                                        </Badge>
+                                    )}
+                                    {s.checkpointRequired && (
+                                        <Badge
+                                            variant="outline"
+                                            className="bg-status-review-bg text-status-review"
+                                        >
+                                            Checkpoint richiesto
+                                        </Badge>
+                                    )}
+                                </div>
                             </div>
 
                             {s.checkpointRequired && s.checkpointNote && (
@@ -815,11 +833,13 @@ function SessionsBlock({
 
                                             return (
                                                 <span key={i}>
-                                                    {a.roleInitial}: {a.userName}
+                                                    {a.roleInitial}:{' '}
+                                                    {a.userName}
                                                     {alt && (
                                                         <span className="text-muted-foreground">
                                                             {' '}
-                                                            · (alt. {alt.userName})
+                                                            · (alt.{' '}
+                                                            {alt.userName})
                                                         </span>
                                                     )}
                                                 </span>

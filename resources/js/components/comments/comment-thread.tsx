@@ -2,10 +2,18 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import type { ContentComment } from '@/types/content';
+
+/** Generico: usato sia dai commenti sui contenuti sia da quelli sulle sessioni shooting (Fase 07). */
+export type ThreadComment = {
+    id: number;
+    authorLabel: 'Cliente' | 'Team';
+    authorName: string;
+    body: string;
+    createdAtLabel: string;
+};
 
 type Props = {
-    comments: ContentComment[];
+    comments: ThreadComment[];
     onSubmit?: (body: string) => void;
 };
 
