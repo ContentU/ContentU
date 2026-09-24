@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ContentTypeController;
+use App\Http\Controllers\ClientAccessController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentController;
@@ -77,6 +78,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('settings')->group(function ()
 Route::middleware(['auth', 'role:admin,account_manager'])->group(function () {
     Route::post('clients/{client}/public-link', [PublicLinkController::class, 'store'])->name('public-link.store');
     Route::delete('public-links/{link}', [PublicLinkController::class, 'destroy'])->name('public-link.destroy');
+
+    Route::post('clients/{client}/access', [ClientAccessController::class, 'store'])->name('client-access.store');
+    Route::delete('clients/{client}/access/{user}', [ClientAccessController::class, 'destroy'])->name('client-access.destroy');
+    Route::post('clients/{client}/access/{user}/resend', [ClientAccessController::class, 'resend'])->name('client-access.resend');
 });
 
 Route::middleware('public-link')->prefix('ped/{clientSlug}')->group(function () {
