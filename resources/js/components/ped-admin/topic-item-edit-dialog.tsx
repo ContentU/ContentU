@@ -44,6 +44,19 @@ export function TopicItemEditDialog({ item }: { item: EditableTopicItem }) {
         });
     };
 
+    // Campi non mostrati nel form (content_type_id non è modificabile qui).
+    const knownFields = [
+        'format_label',
+        'period_label',
+        'title',
+        'theme',
+        'objective',
+        'footnote',
+    ];
+    const otherErrors = Object.entries(errors).filter(
+        ([field]) => !knownFields.includes(field),
+    );
+
     return (
         <Dialog
             open={open}
@@ -65,6 +78,15 @@ export function TopicItemEditDialog({ item }: { item: EditableTopicItem }) {
                     onSubmit={submit}
                     className="grid gap-3 sm:grid-cols-2"
                 >
+                    {otherErrors.length > 0 && (
+                        <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive sm:col-span-2">
+                            Salvataggio non riuscito:{' '}
+                            {otherErrors
+                                .map(([, message]) => message)
+                                .join(' ')}
+                        </p>
+                    )}
+
                     <div className="grid gap-2">
                         <Label>Formato</Label>
                         <Input
@@ -94,8 +116,9 @@ export function TopicItemEditDialog({ item }: { item: EditableTopicItem }) {
                         )}
                     </div>
                     <div className="grid gap-2 sm:col-span-2">
-                        <Label>Titolo</Label>
+                        <Label htmlFor="title">Titolo</Label>
                         <Input
+                            id="title"
                             value={data.title}
                             onChange={(e) => setData('title', e.target.value)}
                         />

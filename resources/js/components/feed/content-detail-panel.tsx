@@ -118,9 +118,13 @@ export function ContentDetailPanel({
             )}
 
             <div className="flex flex-wrap gap-2">
-                {actions.canEdit && content.status === 'draft' && (
-                    <Button onClick={onSendToReview}>Porta in revisione</Button>
-                )}
+                {actions.canEdit &&
+                    content.status === 'draft' &&
+                    onSendToReview && (
+                        <Button onClick={onSendToReview}>
+                            Porta in revisione
+                        </Button>
+                    )}
                 {actions.canApprove && content.status === 'in_review' && (
                     <Button onClick={onApprove}>✓ Approva</Button>
                 )}
@@ -132,11 +136,13 @@ export function ContentDetailPanel({
                         ✕ Rifiuta
                     </Button>
                 )}
-                {actions.canEdit && content.status === 'needs_changes' && (
-                    <Button variant="outline" onClick={onResumeToDraft}>
-                        Riprendi in lavorazione
-                    </Button>
-                )}
+                {actions.canEdit &&
+                    content.status === 'needs_changes' &&
+                    onResumeToDraft && (
+                        <Button variant="outline" onClick={onResumeToDraft}>
+                            Riprendi in lavorazione
+                        </Button>
+                    )}
                 {actions.canEdit && editInPlace && (
                     <ContentEditDialog content={content} />
                 )}

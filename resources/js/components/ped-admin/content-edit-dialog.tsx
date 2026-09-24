@@ -52,6 +52,20 @@ export function ContentEditDialog({ content }: { content: EditableContent }) {
         });
     };
 
+    // Campi non mostrati nel form (es. content_type_id, channels, tag_ids):
+    // se il server li respinge, il salvataggio altrimenti resterebbe silenzioso.
+    const knownFields = [
+        'title',
+        'caption',
+        'hashtags',
+        'resource_url',
+        'cover_resource_url',
+        'publish_at',
+    ];
+    const otherErrors = Object.entries(errors).filter(
+        ([field]) => !knownFields.includes(field),
+    );
+
     return (
         <Dialog
             open={open}
@@ -73,6 +87,15 @@ export function ContentEditDialog({ content }: { content: EditableContent }) {
                     onSubmit={submit}
                     className="grid max-h-[70vh] gap-3 overflow-y-auto pr-1"
                 >
+                    {otherErrors.length > 0 && (
+                        <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">
+                            Salvataggio non riuscito:{' '}
+                            {otherErrors
+                                .map(([, message]) => message)
+                                .join(' ')}
+                        </p>
+                    )}
+
                     <div className="grid gap-2">
                         <Label>Titolo</Label>
                         <Input

@@ -38,6 +38,12 @@ export function TopicMonthEditDialog({ month }: { month: EditableTopicMonth }) {
         });
     };
 
+    // Campo non mostrato nel form (status è reinviato invariato).
+    const knownFields = ['month_label', 'note'];
+    const otherErrors = Object.entries(errors).filter(
+        ([field]) => !knownFields.includes(field),
+    );
+
     return (
         <Dialog
             open={open}
@@ -59,6 +65,15 @@ export function TopicMonthEditDialog({ month }: { month: EditableTopicMonth }) {
                     onSubmit={submit}
                     className="grid gap-3"
                 >
+                    {otherErrors.length > 0 && (
+                        <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">
+                            Salvataggio non riuscito:{' '}
+                            {otherErrors
+                                .map(([, message]) => message)
+                                .join(' ')}
+                        </p>
+                    )}
+
                     <div className="grid gap-2">
                         <Label>Nome mese</Label>
                         <Input

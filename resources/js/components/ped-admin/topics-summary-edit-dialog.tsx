@@ -24,7 +24,7 @@ export function TopicsSummaryEditDialog({
     topicsSummary: string | null;
 }) {
     const [open, setOpen] = useState(false);
-    const { data, setData, patch, processing, reset } = useForm({
+    const { data, setData, patch, processing, errors, reset } = useForm({
         topics_summary: topicsSummary ?? '',
     });
 
@@ -35,6 +35,10 @@ export function TopicsSummaryEditDialog({
             onSuccess: () => setOpen(false),
         });
     };
+
+    const otherErrors = Object.entries(errors).filter(
+        ([field]) => field !== 'topics_summary',
+    );
 
     return (
         <Dialog
@@ -57,6 +61,14 @@ export function TopicsSummaryEditDialog({
                     onSubmit={submit}
                     className="grid gap-2"
                 >
+                    {otherErrors.length > 0 && (
+                        <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">
+                            Salvataggio non riuscito:{' '}
+                            {otherErrors
+                                .map(([, message]) => message)
+                                .join(' ')}
+                        </p>
+                    )}
                     <Textarea
                         rows={8}
                         placeholder="Lascia vuoto per usare il testo generato automaticamente."
@@ -65,6 +77,11 @@ export function TopicsSummaryEditDialog({
                             setData('topics_summary', e.target.value)
                         }
                     />
+                    {errors.topics_summary && (
+                        <p className="text-sm text-destructive">
+                            {errors.topics_summary}
+                        </p>
+                    )}
                 </form>
 
                 <DialogFooter>
