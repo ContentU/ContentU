@@ -161,7 +161,10 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // La registrazione self-service è disattivata: l'accesso al PED è
+        // per allowlist, l'admin invita le email autorizzate (vedi
+        // ClientAccessController) e l'utente imposta la password dal link
+        // di invito, che riusa il flusso di reset password qui sotto.
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

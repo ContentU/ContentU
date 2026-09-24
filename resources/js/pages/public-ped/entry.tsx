@@ -15,9 +15,8 @@ type PublicClient = {
 type Props = {
     client: PublicClient;
     clientSlug: string;
-    mode: 'login' | 'register' | null;
+    mode: 'login' | 'not_allowed' | 'pending_invite' | null;
     email: string | null;
-    passwordRules: string;
 };
 
 function ClientHeader({ client }: { client: PublicClient }) {
@@ -130,79 +129,58 @@ function LoginStep({ client, email }: { client: PublicClient; email: string }) {
     );
 }
 
-function RegisterStep({
+function BackToEmailLink({ clientSlug }: { clientSlug: string }) {
+    return (
+        <a
+            href={`/ped/${clientSlug}`}
+            className="text-center text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+        >
+            Riprova con un&apos;altra email
+        </a>
+    );
+}
+
+function NotAllowedStep({
     client,
-    email,
-    passwordRules,
+    clientSlug,
 }: {
     client: PublicClient;
-    email: string;
-    passwordRules: string;
+    clientSlug: string;
 }) {
-    const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        email,
-        password: '',
-        password_confirmation: '',
-    });
-
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post('/register');
-    };
-
     return (
         <>
             <ClientHeader client={client} />
-            <form
-                onSubmit={submit}
-                className="mx-auto grid w-full max-w-sm gap-4"
-            >
-                <p className="text-center text-sm text-muted-foreground">
-                    Prima volta qui, {email}? Crea il tuo accesso.
+            <div className="mx-auto grid w-full max-w-sm gap-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                    Questa email non è autorizzata ad accedere al PED di{' '}
+                    {client.name}. Contatta l&apos;agenzia per richiedere
+                    l&apos;accesso.
                 </p>
-                <div className="grid gap-2">
-                    <Label htmlFor="name">Nome</Label>
-                    <Input
-                        id="name"
-                        required
-                        autoFocus
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                    />
-                    <InputError message={errors.name} />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
-                    <PasswordInput
-                        id="password"
-                        required
-                        passwordrules={passwordRules}
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-                    <InputError message={errors.password} />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="password_confirmation">
-                        Conferma password
-                    </Label>
-                    <PasswordInput
-                        id="password_confirmation"
-                        required
-                        passwordrules={passwordRules}
-                        value={data.password_confirmation}
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                    />
-                    <InputError message={errors.password_confirmation} />
-                </div>
-                <Button type="submit" disabled={processing}>
-                    {processing && <Spinner />}
-                    Crea accesso
-                </Button>
-            </form>
+                <BackToEmailLink clientSlug={clientSlug} />
+            </div>
+        </>
+    );
+}
+
+function PendingInviteStep({
+    client,
+    clientSlug,
+    email,
+}: {
+    client: PublicClient;
+    clientSlug: string;
+    email: string;
+}) {
+    return (
+        <>
+            <ClientHeader client={client} />
+            <div className="mx-auto grid w-full max-w-sm gap-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                    Ti abbiamo inviato un&apos;email a {email} con il link per
+                    impostare la password. Controlla anche lo spam.
+                </p>
+                <BackToEmailLink clientSlug={clientSlug} />
+            </div>
         </>
     );
 }
@@ -212,7 +190,6 @@ export default function PublicPedEntry({
     clientSlug,
     mode,
     email,
-    passwordRules,
 }: Props) {
     return (
         <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
@@ -224,11 +201,14 @@ export default function PublicPedEntry({
             {mode === 'login' && email && (
                 <LoginStep client={client} email={email} />
             )}
-            {mode === 'register' && email && (
-                <RegisterStep
+            {mode === 'not_allowed' && (
+                <NotAllowedStep client={client} clientSlug={clientSlug} />
+            )}
+            {mode === 'pending_invite' && email && (
+                <PendingInviteStep
                     client={client}
+                    clientSlug={clientSlug}
                     email={email}
-                    passwordRules={passwordRules}
                 />
             )}
         </div>

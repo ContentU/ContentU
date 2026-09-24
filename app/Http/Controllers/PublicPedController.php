@@ -17,7 +17,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -37,7 +36,6 @@ class PublicPedController extends Controller
             'clientSlug' => $clientSlug,
             'mode' => null,
             'email' => null,
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]);
     }
 
@@ -49,17 +47,19 @@ class PublicPedController extends Controller
             'email' => ['required', 'email', 'max:255'],
         ]);
 
-        $exists = User::where('email', $data['email'])
-            ->where('role', 'client')
-            ->whereHas('clients', fn ($q) => $q->whereKey($link->client_id))
-            ->exists();
+        $user = $link->client->pedAccessUsers()->where('email', $data['email'])->first();
+
+        $mode = match (true) {
+            $user === null => 'not_allowed',
+            ! $user->hasSetPassword() => 'pending_invite',
+            default => 'login',
+        };
 
         return Inertia::render('public-ped/entry', [
             'client' => $this->clientPayload($link->client),
             'clientSlug' => $clientSlug,
-            'mode' => $exists ? 'login' : 'register',
+            'mode' => $mode,
             'email' => $data['email'],
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]);
     }
 

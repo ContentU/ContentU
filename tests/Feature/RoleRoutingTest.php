@@ -34,13 +34,13 @@ it('blocca un utente disattivato sulle rotte protette da ruolo', function () {
     $this->actingAs($user)->get('/dashboard')->assertForbidden();
 });
 
-it('nega la registrazione senza un link PED valido in sessione', function () {
+it('non ha nessuna registrazione self-service: l\'accesso al PED è solo per allowlist', function () {
     $this->post('/register', [
         'name' => 'Tizio',
         'email' => 'tizio@example.com',
         'password' => 'password123',
         'password_confirmation' => 'password123',
-    ])->assertForbidden();
+    ])->assertNotFound();
 
     expect(User::where('email', 'tizio@example.com')->exists())->toBeFalse();
 });
