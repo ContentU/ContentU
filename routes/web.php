@@ -35,6 +35,7 @@ Route::middleware(['auth', 'role:admin,account_manager,copywriter'])->group(func
     Route::get('clients/{client}/quarters', [QuarterController::class, 'index'])->name('quarters.index');
     Route::post('clients/{client}/quarters', [QuarterController::class, 'store'])->name('quarters.store');
     Route::get('quarters/{quarter}', [QuarterController::class, 'show'])->name('quarters.show');
+    Route::patch('quarters/{quarter}', [QuarterController::class, 'update'])->name('quarters.update');
     Route::patch('quarters/{quarter}/status', [QuarterController::class, 'updateStatus'])->name('quarters.status');
     Route::get('quarters/{quarter}/feed', [QuarterController::class, 'feed'])->name('quarters.feed');
 
@@ -63,6 +64,8 @@ Route::middleware(['auth', 'role:admin,account_manager'])->prefix('shooting')->g
     Route::get('/', [ShootingController::class, 'index'])->name('shooting.index');
     Route::post('targets', [ShootingController::class, 'storeTarget'])->name('shooting.targets.store');
     Route::post('sessions', [ShootingController::class, 'storeSession'])->name('shooting.sessions.store');
+    Route::put('sessions/{shootingSession}', [ShootingController::class, 'updateSession'])->name('shooting.sessions.update');
+    Route::delete('sessions/{shootingSession}', [ShootingController::class, 'destroySession'])->name('shooting.sessions.destroy');
     Route::put('planning-rules', [ShootingController::class, 'updatePlanningRules'])->name('shooting.planning-rules.update');
 });
 

@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { ShootingSessionEditDialog } from '@/components/ped-admin/shooting-session-edit-dialog';
 import type { PublicClient } from '@/components/public-ped/client-brand';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,9 +12,16 @@ type Session = {
     typeLabel: string;
 };
 
+type Actions = {
+    canEdit: boolean;
+    canApprove: boolean;
+    canComment: boolean;
+};
+
 type Props = {
     client: PublicClient;
     sessions: Session[];
+    actions: Actions;
 };
 
 function prevalentType(sessions: Session[]): string | null {
@@ -29,7 +37,7 @@ function prevalentType(sessions: Session[]): string | null {
     return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-export default function PublicShooting({ client, sessions }: Props) {
+export default function PublicShooting({ client, sessions, actions }: Props) {
     const span =
         sessions.length > 0
             ? `${sessions[0].dateLabel} — ${sessions[sessions.length - 1].dateLabel}`
@@ -99,9 +107,16 @@ export default function PublicShooting({ client, sessions }: Props) {
                                     <span className="font-serif text-lg">
                                         {s.dateLabel}
                                     </span>
-                                    <span className="font-mono text-sm text-muted-foreground uppercase">
-                                        {s.typeLabel}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-mono text-sm text-muted-foreground uppercase">
+                                            {s.typeLabel}
+                                        </span>
+                                        {actions.canEdit && (
+                                            <ShootingSessionEditDialog
+                                                session={s}
+                                            />
+                                        )}
+                                    </div>
                                 </li>
                             ))}
                         </ul>

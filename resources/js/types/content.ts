@@ -8,6 +8,7 @@ export type ContentStatus =
 
 export type FeedContent = {
     id: number;
+    contentTypeId: number;
     title: string;
     caption: string | null;
     hashtags: string | null;

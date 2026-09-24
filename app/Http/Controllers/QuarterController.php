@@ -150,6 +150,22 @@ class QuarterController extends Controller
         ]);
     }
 
+    /** Solo la "Lettura d'insieme" (topics_summary): usata dall'admin per sovrascrivere il testo generato nel PED. */
+    public function update(Request $request, Quarter $quarter): RedirectResponse
+    {
+        $this->authorize('update', $quarter->client);
+
+        $data = $request->validate([
+            'topics_summary' => ['nullable', 'string'],
+        ]);
+
+        $quarter->update($data);
+
+        Inertia::flash('message', 'Lettura d\'insieme aggiornata.');
+
+        return back();
+    }
+
     public function updateStatus(Request $request, Quarter $quarter): RedirectResponse
     {
         $this->authorize('update', $quarter->client);

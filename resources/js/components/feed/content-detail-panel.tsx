@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { CommentThread } from '@/components/comments/comment-thread';
+import { ContentEditDialog } from '@/components/ped-admin/content-edit-dialog';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +18,8 @@ type Props = {
     onSubmitComment?: (body: string) => void;
     onResumeToDraft?: () => void;
     onSendToReview?: () => void;
+    /** Nel PED pubblico l'admin modifica sul posto (dialog); nell'area interna resta il link a /contents/{id}/edit. */
+    editInPlace?: boolean;
 };
 
 export function ContentDetailPanel({
@@ -29,6 +32,7 @@ export function ContentDetailPanel({
     onSubmitComment,
     onResumeToDraft,
     onSendToReview,
+    editInPlace = false,
 }: Props) {
     const [rejecting, setRejecting] = useState(false);
     const [rejectComment, setRejectComment] = useState('');
@@ -133,7 +137,10 @@ export function ContentDetailPanel({
                         Riprendi in lavorazione
                     </Button>
                 )}
-                {actions.canEdit && (
+                {actions.canEdit && editInPlace && (
+                    <ContentEditDialog content={content} />
+                )}
+                {actions.canEdit && !editInPlace && (
                     <Button variant="ghost" asChild>
                         <Link href={`/contents/${content.id}/edit`}>
                             Modifica

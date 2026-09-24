@@ -80,7 +80,11 @@ class PublicPedController extends Controller
         return Inertia::render('public-ped/topic-preview', [
             'client' => $this->clientPayload($link->client),
             'clientSlug' => $clientSlug,
-            'quarter' => $quarter ? ['label' => $quarter->label] : null,
+            'quarter' => $quarter ? [
+                'id' => $quarter->id,
+                'label' => $quarter->label,
+                'topicsSummary' => $quarter->topics_summary,
+            ] : null,
             'months' => $months->map(fn (TopicPreview $preview) => [
                 'id' => $preview->id,
                 'label' => $preview->month_label,
@@ -90,6 +94,7 @@ class PublicPedController extends Controller
                 'note' => $preview->note,
                 'approvalStatus' => $preview->latestApproval?->status,
                 'items' => $preview->items->values()->map(fn ($item, $index) => [
+                    'id' => $item->id,
                     'index' => $index + 1,
                     'formatLabel' => $item->format_label,
                     'periodLabel' => $item->period_label,
@@ -103,6 +108,13 @@ class PublicPedController extends Controller
                 'recurringThemes' => TopicSynthesis::recurringThemes($quarter),
                 'materialToProduce' => TopicSynthesis::materialToProduce($quarter),
             ] : null,
+            // Solo admin: il cliente resta in sola lettura.
+            'actions' => [
+                'canEdit' => $request->user()->isAdmin(),
+                'canApprove' => $request->user()->isClient(),
+                'canReject' => $request->user()->isClient(),
+                'canComment' => $request->user()->isClient(),
+            ],
         ]);
     }
 
@@ -152,11 +164,13 @@ class PublicPedController extends Controller
             'clientSlug' => $clientSlug,
             'quarter' => $quarter ? ['label' => $quarter->label] : null,
             'contents' => $contents,
+            // Solo admin: il cliente resta in sola lettura. Le rotte approve/comment
+            // rifiutano già i non-clienti con 403 lato server.
             'actions' => [
-                'canApprove' => true,
-                'canReject' => true,
-                'canComment' => true,
-                'canEdit' => false, // decisione del capo, corretta due volte
+                'canApprove' => $request->user()->isClient(),
+                'canReject' => $request->user()->isClient(),
+                'canComment' => $request->user()->isClient(),
+                'canEdit' => $request->user()->isAdmin(),
             ],
         ]);
     }
@@ -173,6 +187,11 @@ class PublicPedController extends Controller
                 ->orderBy('session_date')
                 ->get()
                 ->map->toClientArray(),
+            'actions' => [
+                'canEdit' => $request->user()->isAdmin(),
+                'canApprove' => $request->user()->isClient(),
+                'canComment' => $request->user()->isClient(),
+            ],
         ]);
     }
 

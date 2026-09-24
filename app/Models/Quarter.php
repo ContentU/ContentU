@@ -18,7 +18,7 @@ class Quarter extends Model
     use HasFactory;
 
     protected $fillable = [
-        'client_id', 'year', 'quarter_number', 'label', 'status', 'starts_on', 'ends_on',
+        'client_id', 'year', 'quarter_number', 'label', 'status', 'starts_on', 'ends_on', 'topics_summary',
     ];
 
     protected function casts(): array

@@ -128,6 +128,7 @@ export default function PublicPedFeed({
                     onReject={reject}
                     rejectRequiresComment
                     onSubmitComment={submitComment}
+                    editInPlace
                 />
             </div>
         </div>

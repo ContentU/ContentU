@@ -1,5 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { TopicItemEditDialog } from '@/components/ped-admin/topic-item-edit-dialog';
+import { TopicMonthEditDialog } from '@/components/ped-admin/topic-month-edit-dialog';
+import { TopicsSummaryEditDialog } from '@/components/ped-admin/topics-summary-edit-dialog';
 import type { PublicClient } from '@/components/public-ped/client-brand';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 type Item = {
+    id: number;
     index: number;
     formatLabel: string;
     periodLabel: string;
@@ -33,12 +37,20 @@ type Synthesis = {
     materialToProduce: { month: string; title: string }[];
 };
 
+type Actions = {
+    canEdit: boolean;
+    canApprove: boolean;
+    canReject: boolean;
+    canComment: boolean;
+};
+
 type Props = {
     client: PublicClient;
     clientSlug: string;
-    quarter: { label: string } | null;
+    quarter: { id: number; label: string; topicsSummary: string | null } | null;
     months: Month[];
     synthesis: Synthesis | null;
+    actions: Actions;
 };
 
 function MonthBadge({ month }: { month: Month }) {
@@ -118,6 +130,7 @@ export default function PublicPedTopicPreview({
     quarter,
     months,
     synthesis,
+    actions,
 }: Props) {
     return (
         <div className="mx-auto max-w-(--container-reading)">
@@ -184,7 +197,12 @@ export default function PublicPedTopicPreview({
                                     {month.count} argomenti
                                 </p>
                             </div>
-                            <MonthBadge month={month} />
+                            <div className="flex items-center gap-2">
+                                <MonthBadge month={month} />
+                                {actions.canEdit && (
+                                    <TopicMonthEditDialog month={month} />
+                                )}
+                            </div>
                         </div>
 
                         {month.note && (
@@ -199,10 +217,19 @@ export default function PublicPedTopicPreview({
                                     key={item.index}
                                     className="space-y-2 p-4"
                                 >
-                                    <p className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-                                        {String(item.index).padStart(2, '0')} ·{' '}
-                                        {item.formatLabel} · {item.periodLabel}
-                                    </p>
+                                    <div className="flex items-start justify-between gap-2">
+                                        <p className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
+                                            {String(item.index).padStart(
+                                                2,
+                                                '0',
+                                            )}{' '}
+                                            · {item.formatLabel} ·{' '}
+                                            {item.periodLabel}
+                                        </p>
+                                        {actions.canEdit && (
+                                            <TopicItemEditDialog item={item} />
+                                        )}
+                                    </div>
                                     <p className="font-medium">{item.title}</p>
                                     <p className="text-sm text-brand-rose">
                                         {item.theme}
@@ -230,43 +257,70 @@ export default function PublicPedTopicPreview({
                 )}
             </div>
 
-            {synthesis && (
+            {(synthesis || quarter) && (
                 <section className="mt-14 space-y-4 border-t border-border pt-8">
-                    <h2 className="font-serif text-2xl">
-                        Lettura d&apos;insieme
-                    </h2>
-
-                    {synthesis.recurringThemes.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                            {synthesis.recurringThemes.map((t) => (
-                                <Badge key={t.theme} variant="outline">
-                                    {t.theme} · {t.count}
-                                </Badge>
-                            ))}
-                        </div>
-                    )}
-
-                    <p className="text-sm text-muted-foreground">
-                        I temi sopra ricorrono più volte nel trimestre: sono i
-                        filoni portanti attorno a cui ruota il piano editoriale.
-                    </p>
-
-                    <Card className="space-y-2 p-4">
-                        <h3 className="font-medium">Materiale da produrre</h3>
-                        {synthesis.materialToProduce.length > 0 ? (
-                            <ul className="list-inside list-disc text-sm text-muted-foreground">
-                                {synthesis.materialToProduce.map((m, i) => (
-                                    <li key={i}>
-                                        {m.month}: {m.title}
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">
-                                Nessun materiale video da girare al momento.
-                            </p>
+                    <div className="flex items-center gap-2">
+                        <h2 className="font-serif text-2xl">
+                            Lettura d&apos;insieme
+                        </h2>
+                        {actions.canEdit && quarter && (
+                            <TopicsSummaryEditDialog
+                                quarterId={quarter.id}
+                                topicsSummary={quarter.topicsSummary}
+                            />
                         )}
-                    </Card>
+                    </div>
+
+                    {quarter?.topicsSummary ? (
+                        <p className="text-sm whitespace-pre-line text-muted-foreground">
+                            {quarter.topicsSummary}
+                        </p>
+                    ) : (
+                        synthesis && (
+                            <>
+                                {synthesis.recurringThemes.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {synthesis.recurringThemes.map((t) => (
+                                            <Badge
+                                                key={t.theme}
+                                                variant="outline"
+                                            >
+                                                {t.theme} · {t.count}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <p className="text-sm text-muted-foreground">
+                                    I temi sopra ricorrono più volte nel
+                                    trimestre: sono i filoni portanti attorno a
+                                    cui ruota il piano editoriale.
+                                </p>
+
+                                <Card className="space-y-2 p-4">
+                                    <h3 className="font-medium">
+                                        Materiale da produrre
+                                    </h3>
+                                    {synthesis.materialToProduce.length > 0 ? (
+                                        <ul className="list-inside list-disc text-sm text-muted-foreground">
+                                            {synthesis.materialToProduce.map(
+                                                (m, i) => (
+                                                    <li key={i}>
+                                                        {m.month}: {m.title}
+                                                    </li>
+                                                ),
+                                            )}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">
+                                            Nessun materiale video da girare al
+                                            momento.
+                                        </p>
+                                    )}
+                                </Card>
+                            </>
+                        )
+                    )}
 
                     <Card className="space-y-2 bg-brand-rose-tint p-4">
                         <h3 className="font-medium">Cosa ci serve da voi</h3>

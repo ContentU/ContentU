@@ -139,6 +139,7 @@ class Content extends Model
 
         return [
             'id' => $this->id,
+            'contentTypeId' => $this->content_type_id,
             'title' => $this->title,
             'caption' => $this->caption,
             'hashtags' => $this->hashtags,

@@ -151,4 +151,29 @@ class ShootingController extends Controller
 
         return back();
     }
+
+    /** Usato anche dall'admin nel PED pubblico (Fase 05): stesso authorize del resto del controller (role admin/account_manager). */
+    public function updateSession(Request $request, ShootingSession $shootingSession): RedirectResponse
+    {
+        $data = $request->validate([
+            'session_date' => ['required', 'date'],
+            'type' => ['required', Rule::in(['photo', 'video', 'photo_video'])],
+            'is_tentative' => ['boolean'],
+        ]);
+
+        $shootingSession->update($data);
+
+        Inertia::flash('message', 'Sessione aggiornata.');
+
+        return back();
+    }
+
+    public function destroySession(ShootingSession $shootingSession): RedirectResponse
+    {
+        $shootingSession->delete();
+
+        Inertia::flash('message', 'Sessione eliminata.');
+
+        return back();
+    }
 }
