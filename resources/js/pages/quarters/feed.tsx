@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { ContentDetailPanel } from '@/components/feed/content-detail-panel';
 import { ContentGridView } from '@/components/feed/content-grid-view';
 import { ContentListView } from '@/components/feed/content-list-view';
@@ -50,7 +51,15 @@ export default function QuarterFeed({
 
     const updateStatus = (status: string) => {
         if (!selected) return;
-        router.patch(`/contents/${selected.id}/status`, { status });
+        router.patch(
+            `/contents/${selected.id}/status`,
+            { status },
+            {
+                onError: (errors) => {
+                    if (errors.status) toast.error(errors.status);
+                },
+            },
+        );
     };
 
     return (
@@ -147,6 +156,7 @@ export default function QuarterFeed({
                         actions={actions}
                         onSendToReview={() => updateStatus('in_review')}
                         onApprove={() => updateStatus('approved')}
+                        onSchedule={() => updateStatus('scheduled')}
                         onReject={() => updateStatus('needs_changes')}
                         onResumeToDraft={() => updateStatus('draft')}
                         onSubmitComment={(body) => {

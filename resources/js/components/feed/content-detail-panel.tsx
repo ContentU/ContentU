@@ -10,6 +10,7 @@ type Props = {
     content: FeedContent | null;
     actions: FeedViewerActions;
     onApprove?: () => void;
+    onSchedule?: () => void;
     onReject?: (comment?: string) => void;
     /** Il portale cliente richiede sempre un motivo esplicito (§3.7): mostra un form inline invece di rifiutare subito. */
     rejectRequiresComment?: boolean;
@@ -22,6 +23,7 @@ export function ContentDetailPanel({
     content,
     actions,
     onApprove,
+    onSchedule,
     onReject,
     rejectRequiresComment = false,
     onSubmitComment,
@@ -117,6 +119,9 @@ export function ContentDetailPanel({
                 )}
                 {actions.canApprove && content.status === 'in_review' && (
                     <Button onClick={onApprove}>✓ Approva</Button>
+                )}
+                {onSchedule && content.status === 'approved' && (
+                    <Button onClick={onSchedule}>Programma</Button>
                 )}
                 {actions.canReject && !rejecting && (
                     <Button variant="outline" onClick={startReject}>
